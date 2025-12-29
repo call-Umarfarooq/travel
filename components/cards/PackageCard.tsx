@@ -1,7 +1,9 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface PackageCardProps {
+  slug?: string;
   image: string;
   title: string;
   location: string;
@@ -14,6 +16,7 @@ interface PackageCardProps {
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({
+  slug,
   image,
   title,
   location,
@@ -42,15 +45,15 @@ const PackageCard: React.FC<PackageCardProps> = ({
     return stars;
   };
 
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-[#BCCED2]">
+  const CardContent = (
+    <div className="bg-white rounded-2xl overflow-hidden border border-[#BCCED2] h-full hover:shadow-lg transition-shadow duration-300">
       {/* Image */}
       <div className="relative h-52 rounded-tr-2xl rounded-tl-2xl overflow-hidden">
         <Image
           src={image}
           alt={title}
           fill
-          className="object-cover"
+          className="object-cover hover:scale-105 transition-transform duration-500"
         />
       </div>
 
@@ -104,16 +107,26 @@ const PackageCard: React.FC<PackageCardProps> = ({
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <button className="flex-1 bg-primary text-white py-2.5 px-4 rounded-lg font-medium hover:bg-primary-dark transition-colors text-sm">
+          <span className="flex-1 bg-primary text-white py-2.5 px-4 rounded-lg font-medium hover:bg-primary-dark transition-colors text-sm text-center cursor-pointer flex items-center justify-center">
             Explore Now
-          </button>
-          <button className="flex-1 bg-primary text-white py-2.5 px-4 rounded-lg font-medium hover:bg-primary-dark transition-colors text-sm">
-            Explore Now
-          </button>
+          </span>
+          <span className="flex-1 bg-primary text-white py-2.5 px-4 rounded-lg font-medium hover:bg-primary-dark transition-colors text-sm text-center cursor-pointer flex items-center justify-center">
+            Book Now
+          </span>
         </div>
       </div>
     </div>
   );
+
+  if (slug) {
+    return (
+      <Link href={`/tour-details/${slug}`} className="block h-full">
+        {CardContent}
+      </Link>
+    );
+  }
+
+  return CardContent;
 };
 
 export default PackageCard;

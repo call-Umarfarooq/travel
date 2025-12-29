@@ -1,58 +1,29 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PackageCard from '../cards/PackageCard';
 
 const TrendingPackagesSection: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(1);
+  const [packages, setPackages] = useState<any[]>([]);
 
-  const packages = [
-    {
-      image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop',
-      title: 'Switzerland',
-      location: 'Europe',
-      duration: '8 Days',
-      hours: '180 hour',
-      peopleGoing: 25,
-      price: '456.50 AED',
-      rating: 5.0,
-      description: 'animi sit mollitia amet id quod eligendi. Et labore harum non nobis ipsum eum molestias mollitia et corporis.',
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop',
-      title: 'Switzerland',
-      location: 'Europe',
-      duration: '8 Days',
-      hours: '180 hour',
-      peopleGoing: 25,
-      price: '456.50 AED',
-      rating: 5.0,
-      description: 'animi sit mollitia amet id quod eligendi. Et labore harum non nobis ipsum eum molestias mollitia et corporis.',
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&h=300&fit=crop',
-      title: 'Switzerland',
-      location: 'Europe',
-      duration: '8 Days',
-      hours: '180 hour',
-      peopleGoing: 25,
-      price: '456.50 AED',
-      rating: 5.0,
-      description: 'animi sit mollitia amet id quod eligendi. Et labore harum non nobis ipsum eum molestias mollitia et corporis.',
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=400&h=300&fit=crop',
-      title: 'Switzerland',
-      location: 'Europe',
-      duration: '8 Days',
-      hours: '180 hour',
-      peopleGoing: 25,
-      price: '456.50 AED',
-      rating: 5.0,
-      description: 'animi sit mollitia amet id quod eligendi. Et labore harum non nobis ipsum eum molestias mollitia et corporis.',
-    },
-  ];
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch('/api/packages');
+        const data = await res.json();
+        if (data.success) {
+          // Verify data structure and map if necessary
+          setPackages(data.data); 
+        }
+      } catch (error) {
+        console.error('Failed to fetch packages:', error);
+      }
+    };
+
+    fetchPackages();
+  }, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -81,7 +52,7 @@ const TrendingPackagesSection: React.FC = () => {
           </span>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark leading-tight">
             Our Trending Tour
-            
+            <br />
             Packages
           </h2>
         </div>
@@ -104,11 +75,26 @@ const TrendingPackagesSection: React.FC = () => {
             className="flex gap-6 overflow-x-auto scrollbar-hide px-8"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {packages.map((pkg, index) => (
-              <div key={index} className="flex-shrink-0 w-72">
-                <PackageCard {...pkg} />
-              </div>
-            ))}
+            {packages.length > 0 ? (
+                packages.map((pkg, index) => (
+                <div key={pkg._id || index} className="flex-shrink-0 w-72">
+                    <PackageCard 
+                        image={pkg.image}
+                        title={pkg.title}
+                        location={pkg.location}
+                        duration={pkg.duration}
+                        hours={'24 hours'} // Default or derive from duration if format differs
+                        peopleGoing={pkg.peopleGoing}
+                        price={`${pkg.price} AED`}
+                        rating={pkg.rating}
+                        description={pkg.description}
+                        slug={pkg.slug}
+                    />
+                </div>
+                ))
+            ) : (
+                <p className="text-center w-full text-gray-500">Loading packages...</p>
+            )}
           </div>
 
           {/* Right Arrow */}
@@ -124,7 +110,7 @@ const TrendingPackagesSection: React.FC = () => {
 
         {/* Pagination Dots */}
         <div className="flex justify-center gap-2 mt-10">
-          {[...Array(7)].map((_, index) => (
+          {[...Array(Math.min(7, Math.max(1, packages.length)))].map((_, index) => (
             <button
               key={index}
               onClick={() => setActiveIndex(index)}

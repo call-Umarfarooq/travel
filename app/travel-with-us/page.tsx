@@ -1,13 +1,49 @@
-import React from "react";
+'use client';
+
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from 'next/navigation';
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import TourPackageCard from "./components/TourPackageCard";
 import TripSidebar from "./components/TripSidebar";
 import SortBar from "./components/SortBar";
 import Pagination from "./components/Pagination";
-import { packagesData } from "./types";
 
-export default function TravelWithUsPage() {
+function TravelContent() {
+  const searchParams = useSearchParams();
+  const categoryId = searchParams.get('category');
+  const [packages, setPackages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      setLoading(true);
+      try {
+        const query = categoryId ? `?category=${categoryId}` : '';
+        const res = await fetch(`/api/packages${query}`);
+        const json = await res.json();
+        if (json.success) {
+          setPackages(json.data.map((pkg: any) => ({
+            id: pkg._id,
+            image: pkg.image,
+            date: pkg.duration, // Mapping duration to 'date' badge
+            reviews: pkg.peopleGoing, // Mapping people to reviews count
+            city: pkg.title, // Mapping title to city
+            description: pkg.description,
+            price: pkg.price,
+            rating: pkg.rating
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch packages', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, [categoryId]);
+
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
       <Header />
@@ -30,7 +66,7 @@ export default function TravelWithUsPage() {
             Travel With Us
           </h1>
         </div>
-      </section>
+      </section> 
 
       {/* Sort Bar - Overlapping Hero */}
       <div className="max-w-5xl mx-auto px-4 -mt-5  relative z-20">
@@ -43,17 +79,24 @@ export default function TravelWithUsPage() {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Package Cards Grid - LEFT */}
             <section className="w-full lg:w-[58%]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {packagesData.map((pkg, index) => (
-                  <TourPackageCard 
-                    key={pkg.id} 
-                    data={pkg} 
-                    isHighlighted={index === 0}
-                  />
-                ))}
-              </div>
-              
-              <Pagination totalPages={4} />
+              {loading ? (
+                  <div className="text-center py-10">Loading packages...</div>
+              ) : packages.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {packages.map((pkg, index) => (
+                        <TourPackageCard 
+                            key={pkg.id} 
+                            data={pkg} 
+                            isHighlighted={index === 0}
+                        />
+                        ))}
+                    </div>
+                    <Pagination totalPages={1} /> 
+                  </>
+              ) : (
+                  <div className="text-center py-10 text-gray-500">No packages found for this category.</div>
+              )}
             </section>
 
             {/* Sidebar - RIGHT */}
@@ -67,4 +110,12 @@ export default function TravelWithUsPage() {
       <Footer />
     </div>
   );
+}
+
+export default function TravelWithUsPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <TravelContent />
+        </Suspense>
+    );
 }

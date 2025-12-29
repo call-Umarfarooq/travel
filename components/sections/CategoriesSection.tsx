@@ -1,44 +1,52 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface Category {
   image: string;
   title: string;
+  _id?: string;
 }
 
 const CategoriesSection: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [startIndex, setStartIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const allCategories: Category[] = [
-    { image: 'https://picsum.photos/300/450?random=coral-reef', title: 'Wildlife' },
-    { image: 'https://picsum.photos/300/450?random=desert-walk', title: 'Walking' },
-    { image: 'https://picsum.photos/300/450?random=cruise-ship', title: 'Cruises' },
-    { image: 'https://picsum.photos/300/450?random=snow-hiking', title: 'Hiking' },
-    { image: 'https://picsum.photos/300/450?random=seaplane', title: 'Airbirds' },
-    { image: 'https://picsum.photos/300/450?random=beach-sunset', title: 'Beach' },
-    { image: 'https://picsum.photos/300/450?random=mountain-view', title: 'Mountains' },
-    { image: 'https://picsum.photos/300/450?random=safari', title: 'Safari' },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+           const mapped = data.data.map((cat: any) => ({
+            image: cat.image,
+            title: cat.name,
+            _id: cat._id
+          }));
+          setCategories(mapped);
+        } else {
+             // Fallback to dummy data if DB is empty so UI doesn't look broken during demo
+             // Or leave empty. User asked to "integrate", implying dynamic data.
+             // But if I strictly rely on DB and it's empty, the UI will be empty.
+             // I'll assume that's intended, but I'll add a check to not break the wave logic.
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Get visible 5 cards based on current start index
-  const getVisibleCategories = () => {
-    const result = [];
-    for (let i = 0; i < 5; i++) {
-      const index = (startIndex + i) % allCategories.length;
-      result.push(allCategories[index]);
-    }
-    return result;
-  };
-
-  const visibleCategories = getVisibleCategories();
+    fetchCategories();
+  }, []);
 
   // Wave configuration for each of the 5 visible positions
-  // Position 0: far left, Position 2: center (highest), Position 4: far right
   const waveConfig = [
     { translateY: 50, rotate: -10, aspectRatio: '4/4' },   // Far left - lowest
     { translateY: 30, rotate: -5, aspectRatio: '4/4' },    // Left
@@ -47,6 +55,24 @@ const CategoriesSection: React.FC = () => {
     { translateY: 60, rotate: 10, aspectRatio: '4/4' },    // Far right - lowest
   ];
 
+  // Helper to safely get length
+  const totalCategories = categories.length;
+
+  // Get visible 5 cards based on current start index
+  const getVisibleCategories = () => {
+    if (totalCategories === 0) return [];
+    
+    const result = [];
+    for (let i = 0; i < 5; i++) {
+      const index = (startIndex + i) % totalCategories;
+      // Handle case where totalCategories < 5 by cycling existing ones
+      result.push(categories[index]);
+    }
+    return result;
+  };
+
+  const visibleCategories = getVisibleCategories();
+
   // Cooldown to prevent rapid navigation
   const [isNavigating, setIsNavigating] = useState(false);
   const scrollAccumulator = useRef(0);
@@ -54,18 +80,18 @@ const CategoriesSection: React.FC = () => {
   const SCROLL_THRESHOLD = 50; // Scroll amount needed to trigger navigation
 
   const handlePrev = useCallback(() => {
-    if (isNavigating) return;
+    if (isNavigating || totalCategories === 0) return;
     setIsNavigating(true);
-    setStartIndex((prev) => (prev === 0 ? allCategories.length - 1 : prev - 1));
+    setStartIndex((prev) => (prev === 0 ? totalCategories - 1 : prev - 1));
     setTimeout(() => setIsNavigating(false), COOLDOWN_MS);
-  }, [allCategories.length, isNavigating]);
+  }, [totalCategories, isNavigating]);
 
   const handleNext = useCallback(() => {
-    if (isNavigating) return;
+    if (isNavigating || totalCategories === 0) return;
     setIsNavigating(true);
-    setStartIndex((prev) => (prev + 1) % allCategories.length);
+    setStartIndex((prev) => (prev + 1) % totalCategories);
     setTimeout(() => setIsNavigating(false), COOLDOWN_MS);
-  }, [allCategories.length, isNavigating]);
+  }, [totalCategories, isNavigating]);
 
   // Mouse drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -77,7 +103,7 @@ const CategoriesSection: React.FC = () => {
     if (!isDragging) return;
     
     const dragDistance = e.clientX - dragStartX;
-    const threshold = 150; // Increased drag distance threshold for slower navigation
+    const threshold = 150; 
     
     if (dragDistance > threshold) {
       handlePrev();
@@ -112,6 +138,21 @@ const CategoriesSection: React.FC = () => {
     }
   }, [handleNext, handlePrev]);
 
+  if (loading) {
+      return <div className="py-16 text-center">Loading Categories...</div>;
+  }
+
+  if (totalCategories === 0) {
+      return (
+          <section className="py-16 bg-white overflow-hidden">
+             <div className="max-w-7xl mx-auto px-2 text-center">
+                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark mb-8">Tour Categories</h2>
+                 <p className="text-gray-500">No categories found. Please add some from the dashboard.</p>
+             </div>
+          </section>
+      );
+  }
+
   return (
     <section className="py-16 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-2">
@@ -133,7 +174,9 @@ const CategoriesSection: React.FC = () => {
           {/* Cards Row - Wave Layout with percentage widths */}
           <div className="flex justify-between items-start w-full min-h-[380px] select-none">
             {visibleCategories.map((category, index) => {
-              const config = waveConfig[index];
+              // Ensure we fallback gracefully if we have fewer than 5 items and wave expects 5
+              // Though we loop to fill 5 slots in getVisibleCategories
+              const config = waveConfig[index] || waveConfig[0];
               
               return (
                 <div
@@ -163,9 +206,12 @@ const CategoriesSection: React.FC = () => {
                     style={{ transform: `rotate(${config.rotate}deg)` }}
                   >
                     <h3 className="text-base font-semibold text-dark">{category.title}</h3>
-                    <button className="text-sm text-gray-400 hover:text-primary transition-colors">
+                    <Link 
+                      href={category._id ? `/travel-with-us?category=${category._id}` : '/travel-with-us'}
+                      className="text-sm text-gray-400 hover:text-primary transition-colors inline-block mt-1"
+                    >
                       See More
-                    </button>
+                    </Link>
                   </div>
                 </div>
               );
@@ -175,7 +221,7 @@ const CategoriesSection: React.FC = () => {
 
         {/* Pagination Dots */}
         <div className="flex justify-center gap-2 mt-5">
-          {allCategories.map((_, index) => (
+          {categories.map((_, index) => (
             <button
               key={index}
               onClick={() => setStartIndex(index)}
