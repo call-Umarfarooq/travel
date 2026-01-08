@@ -10,8 +10,9 @@ import Image from 'next/image';
 import RecentGallery from '@/components/sections/RecentGallery';
 import ReviewsSection from '@/components/sections/ReviewsSection';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import BookingModal from '../components/BookingModal';
+import { useCart } from '@/context/CartContext';
 
 export default function CityTourPage() {
   const params = useParams();
@@ -89,20 +90,35 @@ export default function CityTourPage() {
     // fetchAvailability(date);
   };
 
+  const { addToCart } = useCart();
+  const router = useRouter();
+
   const handleBookNow = (option: any, guestDetails: any) => {
-    setBookingDetails({
-      title: option.title,
-      date: selectedDate || new Date(),
+    const itemToAdd = {
+      title: activeData.title,
+      slug: slug || 'custom-package',
+      image: activeData.image,
+      optionTitle: option.title,
       time: option.time,
-      guests: {
-        adults: guestDetails.adults,
-        children: guestDetails.children,
-        infants: guestDetails.infants,
-      },
-      totalPrice: guestDetails.totalPrice,
-      currency: 'AED',
-    });
-    setIsBookingOpen(true);
+      date: selectedDate || new Date(),
+      pricingType: option.pricingType || 'person',
+      
+      guests: guestDetails.guests || 0,
+      items: guestDetails.items || 0,
+      adults: guestDetails.adults || 0,
+      children: guestDetails.children || 0,
+      infants: guestDetails.infants || 0,
+      
+      totalPrice: Number(guestDetails.totalPrice)
+    };
+
+    addToCart(itemToAdd);
+
+    if (guestDetails.action === 'book_now') {
+      router.push('/cart');
+    } else {
+      alert('Added to cart successfully!');
+    }
   };
 
 

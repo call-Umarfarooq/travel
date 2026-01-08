@@ -295,18 +295,36 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
           </div>
           
           <div className="flex gap-3">
-            <button className="px-6 py-3 bg-white border border-gray-300 text-[#000000] text-[24px] font-medium rounded-lg hover:bg-gray-50 transition-colors">
-              Add To Cart
-            </button>
             <button 
-              onClick={() => onBookNow && onBookNow({ 
+              onClick={() => {
+                 if (!selectedDate) { alert('Please select a date first'); return; }
+                 const details = { 
                   adults: pricingType === 'person' ? adults : 0, 
                   children: pricingType === 'person' ? children : 0, 
                   infants: pricingType === 'person' ? infants : 0,
                   guests: pricingType === 'group' ? guests : 0,
                   items: pricingType === 'group' ? items : 0,
                   totalPrice: calculateTotal() 
-              })}
+                 };
+                 if(onBookNow) onBookNow({...details, action: 'add_to_cart'} as any);
+              }}
+              className="px-6 py-3 bg-white border border-gray-300 text-[#000000] text-[24px] font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Add To Cart
+            </button>
+            <button 
+              onClick={() => {
+                if (!selectedDate) { alert('Please select a date first'); return; }
+                const details = { 
+                  adults: pricingType === 'person' ? adults : 0, 
+                  children: pricingType === 'person' ? children : 0, 
+                  infants: pricingType === 'person' ? infants : 0,
+                  guests: pricingType === 'group' ? guests : 0,
+                  items: pricingType === 'group' ? items : 0,
+                  totalPrice: calculateTotal() 
+                };
+                if(onBookNow) onBookNow({...details, action: 'book_now'} as any);
+              }}
               className="px-8 py-3 bg-[#F85E46] text-white text-[24px] font-medium rounded-lg hover:bg-[#e54d36] transition-colors"
             >
               Book Now

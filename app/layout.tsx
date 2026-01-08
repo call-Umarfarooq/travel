@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Discover amazing travel destinations and packages",
 };
 
+import { CartProvider } from '@/context/CartContext';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${volkhov.variable} font-sans antialiased`}
       >
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
