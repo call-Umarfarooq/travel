@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'randomuser.me',
       },
+      {
+        protocol: 'http',
+        hostname: 'ock4gscw880og80owcg8gcgw.31.97.48.137.sslip.io',
+      },
     ],
   },
 };
