@@ -46,8 +46,18 @@ export async function POST(request: Request) {
     const imageFile = formData.get('image') as File;
     const galleryFiles = formData.getAll('gallery') as File[];
 
-    if (!title || !price || !location || !duration || !description || !categoryId || !imageFile) {
-      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    // Validate fields
+    const missing: string[] = [];
+    if (!title) missing.push('title');
+    if (price === undefined || price === null || isNaN(price)) missing.push('price');
+    if (!location) missing.push('location');
+    if (!duration) missing.push('duration');
+    if (!description) missing.push('description');
+    if (!categoryId) missing.push('categoryId');
+    if (!imageFile) missing.push('image');
+
+    if (missing.length > 0) {
+      return NextResponse.json({ success: false, error: `Missing required fields: ${missing.join(', ')}` }, { status: 400 });
     }
 
     // Helper to upload image
@@ -115,6 +125,34 @@ export async function POST(request: Request) {
         console.error("Failed to parse tourOptions", e);
     }
 
+    // Extract extra fields
+    const durationDays = Number(formData.get('durationDays'));
+    const durationHours = Number(formData.get('durationHours'));
+    const minAge = formData.get('minAge') ? Number(formData.get('minAge')) : undefined;
+    const maxAge = formData.get('maxAge') ? Number(formData.get('maxAge')) : undefined;
+
+    // Parse Itinerary
+    const itineraryJson = formData.get('itinerary') as string;
+    let itinerary = [];
+    try {
+        if (itineraryJson) {
+            itinerary = JSON.parse(itineraryJson);
+        }
+    } catch (e) {
+        console.error("Failed to parse itinerary", e);
+    }
+
+    // Parse Extra Services
+    const extraServicesJson = formData.get('extraServices') as string;
+    let extraServices = [];
+    try {
+        if (extraServicesJson) {
+            extraServices = JSON.parse(extraServicesJson);
+        }
+    } catch (e) {
+        console.error("Failed to parse extraServices", e);
+    }
+
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
     const newPackage = await Package.create({
@@ -124,14 +162,20 @@ export async function POST(request: Request) {
       image: imageUrl,
       price,
       location,
-      duration,
+      duration, // String display
+      durationDays,
+      durationHours,
+      minAge,
+      maxAge,
       description,
-      peopleGoing: Math.floor(Math.random() * 100) + 10, // Mock data
-      rating: 5, // Default
+      peopleGoing: Math.floor(Math.random() * 100) + 10,
+      rating: 5,
       includes: includes || '',
       highlights: highlights || '',
       tourOptions: tourOptions,
       features: features, 
+      itinerary: itinerary,
+      extraServices: extraServices,
       gallery: galleryUrls,
     });
 

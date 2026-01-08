@@ -7,25 +7,44 @@ export interface IPackage extends Document {
   image: string;
   price: number;
   discountedPrice?: number;
+  
   duration: string;
+  durationDays?: number;
+  durationHours?: number;
+  
+  minAge?: number;
+  maxAge?: number;
+
   peopleGoing: number;
   rating: number;
   location: string;
   description: string;
+  
   tourOptions: {
     title: string;
     duration: string;
-    features: { icon: string; label: string }[];
-    penalty: string;
     time: string;
+    
+    pricingType?: 'person' | 'group';
+    minPax?: number;
+    maxPax?: number;
+    
     adultPrice?: number;
     childPrice?: number;
     infantPrice?: number;
-    pricePerPerson?: number; // Backward compatibility
+    groupPrice?: number;
+    
+    penalty: string;
     currency: string;
+    features: { icon: string; label: string }[];
     inclusions?: string[];
+    pricePerPerson?: number; 
   }[];
+
   features: { icon: string; title: string; description: string }[];
+  itinerary?: { day: number; title: string; description: string }[];
+  extraServices?: { name: string; price: number; type: 'person' | 'group' | 'fixed' }[];
+
   highlights: string;
   includes: string;
   gallery: string[];
@@ -62,10 +81,19 @@ const PackageSchema: Schema<IPackage> = new Schema(
     discountedPrice: {
       type: Number,
     },
+    // Simple display string
     duration: {
       type: String,
-      required: [true, 'Please provide duration (e.g., 4 Hours)'],
+      required: [true, 'Please provide duration string'],
     },
+    // Structured duration
+    durationDays: { type: Number, default: 0 },
+    durationHours: { type: Number, default: 0 },
+    
+    // Age Limits
+    minAge: { type: Number },
+    maxAge: { type: Number },
+
     peopleGoing: {
       type: Number,
       default: 0,
@@ -82,25 +110,50 @@ const PackageSchema: Schema<IPackage> = new Schema(
       type: String,
       required: [true, 'Please provide a description'],
     },
-    // Adding optional arrays for detailed content
+    // Detailed content
     tourOptions: [{
       title: String,
-      duration: String,
-      features: [{ icon: String, label: String }],
-      penalty: String,
+      duration: String, // Keep for backward compat or specific option duration
       time: String,
+      
+      // Pricing
+      pricingType: { type: String, enum: ['person', 'group'], default: 'person' },
+      minPax: { type: Number, default: 1 },
+      maxPax: Number,
+      
       adultPrice: Number,
       childPrice: Number,
       infantPrice: Number,
-      pricePerPerson: Number, // Backward compatibility
-      currency: String,
+      
+      // Group Pricing
+      groupPrice: Number,
+      
+      penalty: String,
+      currency: { type: String, default: 'AED' },
+      features: [{ icon: String, label: String }],
       inclusions: [String],
     }],
+    
     features: [{
       icon: String,
       title: String,
       description: String,
     }],
+    
+    // New: Itinerary
+    itinerary: [{
+      day: Number,
+      title: String,
+      description: String,
+    }],
+
+    // New: Extra Services
+    extraServices: [{
+      name: String,
+      price: Number,
+      type: { type: String, enum: ['person', 'group', 'fixed'], default: 'person' },
+    }],
+
     highlights: String,
     includes: String,
     gallery: [String],

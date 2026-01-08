@@ -8,18 +8,26 @@ interface TourOptionCardProps {
   features: { icon: string; label: string }[];
   penalty: string;
   time: string;
+  
+  // Pricing & Configuration
+  pricingType?: 'person' | 'group';
   adultPrice?: number;
   childPrice?: number;
   infantPrice?: number;
+  groupPrice?: number;
+  maxPax?: number; // Capacity per vehicle/group
   pricePerPerson?: number; // Backward compatibility
+  
   currency?: string;
   isExpanded?: boolean;
   selectedDate?: Date;
   inclusions?: string[];
   onBookNow?: (details: {
-    adults: number;
-    children: number;
-    infants: number;
+    adults?: number;
+    children?: number;
+    infants?: number;
+    guests?: number;
+    items?: number;
     totalPrice: string;
   }) => void;
 }
@@ -30,9 +38,12 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   features,
   penalty,
   time,
+  pricingType = 'person',
   adultPrice,
   childPrice,
   infantPrice,
+  groupPrice,
+  maxPax,
   pricePerPerson,
   currency = 'AED',
   isExpanded = false,
@@ -41,23 +52,61 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   onBookNow,
 }) => {
   const [expanded, setExpanded] = useState(isExpanded);
+  
+  // Person Mode State
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
 
-  // Backward compatibility: use pricePerPerson if multi-tier prices not provided
+  // Group Mode State
+  const [guests, setGuests] = useState(1);
+  const [items, setItems] = useState(1);
+
+  // Backward compatibility
   const finalAdultPrice = adultPrice ?? pricePerPerson ?? 253.50;
   const finalChildPrice = childPrice ?? (pricePerPerson ? pricePerPerson * 0.7 : 177.45);
   const finalInfantPrice = infantPrice ?? 0;
+  const finalGroupPrice = groupPrice ?? 0;
 
-  const totalPrice = (
-    (finalAdultPrice * adults) + 
-    (finalChildPrice * children) + 
-    (finalInfantPrice * infants)
-  ).toFixed(2);
+  // --- Logic for Group Mode ---
+  const handleGuestChange = (delta: number) => {
+    const newGuests = Math.max(1, guests + delta);
+    setGuests(newGuests);
+    
+    // Auto-adjust items based on capacity
+    const capacity = maxPax || 1;
+    const minItems = Math.ceil(newGuests / capacity);
+    if (items < minItems) {
+      setItems(minItems);
+    }
+  };
+
+  const handleItemChange = (delta: number) => {
+    const newItems = Math.max(1, items + delta);
+    
+    // Helper: Constraint check
+    const capacity = maxPax || 1;
+    const minItems = Math.ceil(guests / capacity);
+    
+    if (newItems >= minItems) {
+        setItems(newItems);
+    }
+  };
+
+  // Calculate Total
+  const calculateTotal = () => {
+    if (pricingType === 'group') {
+      return (items * finalGroupPrice).toFixed(2);
+    }
+    return (
+      (finalAdultPrice * adults) + 
+      (finalChildPrice * children) + 
+      (finalInfantPrice * infants)
+    ).toFixed(2);
+  };
 
   return (
-    <div className={`border-2 rounded-2xl overflow-hidden transition-all mb-4 ${expanded ? 'border-[#F85E46]' : 'border-gray-200'}`}>
+    <div className={`rounded-2xl overflow-hidden transition-all mb-4 border-2 ${expanded ? 'border-[#F85E46] bg-[#FFF8F6]' : 'border-gray-200 bg-white'}`}>
       {/* Card Content */}
       <div className="p-6 relative">
         {/* Collapse Arrow */}
@@ -84,21 +133,9 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
           {features.map((feature, index) => (
             <React.Fragment key={index}>
               <div className="flex items-center gap-2 text-[20px] text-[#000000]">
-                {feature.icon === 'car' && (
-                  <svg className="w-[35px] h-[24px] text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 17h8M8 17v-4m8 4v-4m-8 0h8m-8 0l-2-4h12l-2 4M6 9l2-4h8l2 4" />
-                  </svg>
-                )}
-                {feature.icon === 'bus' && (
-                  <svg className="w-[35px] h-[24px] text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7h8m-8 4h8M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                )}
-                {feature.icon === 'guide' && (
-                  <svg className="w-[35px] h-[24px] text-transparent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                )}
+                {feature.icon === 'car' && <span className="text-[#F85E46]">🚗</span>}
+                {feature.icon === 'bus' && <span className="text-[#F85E46]">🚌</span>}
+                {feature.icon === 'guide' && <span className="text-[#F85E46]">🗣️</span>}
                 <span>{feature.label}</span>
               </div>
               {index < features.length - 1 && (
@@ -118,114 +155,115 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
 
         {expanded && (
           <>
-            {/* Divider */}
             <div className="border-t border-gray-200 my-4"></div>
 
-            {/* Selected Date Display (if available) */}
+            {/* Selected Date */}
             {selectedDate && (
-              <div className="mb-4 px-4 py-2 bg-[#C5D86D]/20 rounded-lg">
+              <div className="mb-4 px-4 py-2 bg-[#C5D86D]/20 rounded-lg inline-block">
                 <span className="text-[18px] text-[#181E4B] font-medium">
-                  Selected Date: {selectedDate.toLocaleDateString('en-US', { 
-                    weekday: 'short', 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
+                  Selected Date: {selectedDate.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
                 </span>
               </div>
             )}
 
             {/* Time */}
-            <button className="px-6 py-2 bg-[#F85E46] text-white text-sm font-medium rounded-full mb-4">
-              {time}
-            </button>
-
-            {/* Number Of Participants */}
-            <div className="flex items-center gap-2 text-[20px] text-[#000000] mb-4">
-              <svg className="w-[24px] h-[24px] text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span>Number Of Participants:</span>
+            <div className="mb-6">
+               <span className="px-6 py-2 bg-[#F85E46] text-white text-sm font-medium rounded-full">
+                 {time}
+               </span>
             </div>
 
-            {/* Adults Selector */}
-            <div className="bg-[#E8E8E8] rounded-xl p-4 flex items-center justify-between mb-3">
-              <div>
-                <span className="font-bold text-[24px] text-[#181E4B]">Adults</span>
-                <span className="text-[20px] text-[#000000] ml-2">(Age: 12-99)</span>
-                <p className="text-[20px] text-[#000000] mt-1">From {finalAdultPrice.toFixed(2)} {currency}</p>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setAdults(Math.max(1, adults - 1))}
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  <span className="text-xl">−</span>
-                </button>
-                <span className="text-xl font-medium w-8 text-center">{adults}</span>
-                <button 
-                  onClick={() => setAdults(adults + 1)}
-                  className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition-colors"
-                >
-                  <span className="text-xl">+</span>
-                </button>
-              </div>
-            </div>
+            {/* --- PRICING LOGIC UI --- */}
+            
+            {pricingType === 'group' ? (
+              /* GROUP MODE UI */
+              <div className="space-y-4 mb-6">
+                 <div className="flex items-center gap-2 text-[18px] text-[#F85E46] font-medium mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    Number of participants: <span className="text-gray-500 text-sm font-normal">(You can select up to {maxPax} guests per item)</span>
+                 </div>
 
-            {/* Children Selector */}
-            <div className="bg-[#E8E8E8] rounded-xl p-4 flex items-center justify-between mb-3">
-              <div>
-                <span className="font-bold text-[24px] text-[#181E4B]">Children</span>
-                <span className="text-[20px] text-[#000000] ml-2">(Age: 2-11)</span>
-                <p className="text-[20px] text-[#000000] mt-1">From {finalChildPrice.toFixed(2)} {currency}</p>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setChildren(Math.max(0, children - 1))}
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  <span className="text-xl">−</span>
-                </button>
-                <span className="text-xl font-medium w-8 text-center">{children}</span>
-                <button 
-                  onClick={() => setChildren(children + 1)}
-                  className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition-colors"
-                >
-                  <span className="text-xl">+</span>
-                </button>
-              </div>
-            </div>
+                 {/* Guests Row */}
+                 <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
+                    <span className="font-bold text-[22px] text-[#181E4B]">Guests</span>
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => handleGuestChange(-1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">−</button>
+                        <span className="w-8 text-center font-bold text-[22px] text-[#F85E46]">{guests}</span>
+                        <button onClick={() => handleGuestChange(1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
+                    </div>
+                 </div>
 
-            {/* Infants Selector */}
-            <div className="bg-[#E8E8E8] rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <span className="font-bold text-[24px] text-[#181E4B]">Infants</span>
-                <span className="text-[20px] text-[#000000] ml-2">(Age: 0-1)</span>
-                <p className="text-[20px] text-[#000000] mt-1">
-                  {finalInfantPrice === 0 ? 'Free' : `From ${finalInfantPrice.toFixed(2)} ${currency}`}
-                </p>
+                 {/* Items Row */}
+                 <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <span className="font-bold text-[20px] text-[#181E4B] block">{title}</span>
+                        <span className="text-[16px] text-[#000000]">({maxPax} Seater)</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                         {/* Disabled Minus if at minimum */}
+                        <button 
+                             onClick={() => handleItemChange(-1)} 
+                             className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl transition shadow-sm ${items <= Math.ceil(guests / (maxPax || 1)) ? 'bg-white text-gray-400 cursor-not-allowed' : 'bg-white text-[#F85E46] hover:bg-gray-50'}`}
+                             disabled={items <= Math.ceil(guests / (maxPax || 1))}
+                        >
+                            −
+                        </button>
+                        <span className="w-8 text-center font-bold text-[22px] text-[#F85E46]">{items}</span>
+                        <button onClick={() => handleItemChange(1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
+                    </div>
+                 </div>
               </div>
-              
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setInfants(Math.max(0, infants - 1))}
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  <span className="text-xl">−</span>
-                </button>
-                <span className="text-xl font-medium w-8 text-center">{infants}</span>
-                <button 
-                  onClick={() => setInfants(infants + 1)}
-                  className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition-colors"
-                >
-                  <span className="text-xl">+</span>
-                </button>
-              </div>
-            </div>
+            ) : (
+              /* PERSON MODE UI */
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-2 text-[18px] text-[#F85E46] font-medium mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    Number Of Participants:
+                </div>
 
-            {/* Inclusions (if available) */}
+                {/* Adults */}
+                <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-[22px] text-[#181E4B]">Adults <span className="text-[18px] font-normal text-gray-600">(Age: 12-99)</span></span>
+                    <p className="text-[18px] text-[#000000] mt-1">From {finalAdultPrice} {currency}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
+                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{adults}</span>
+                    <button onClick={() => setAdults(adults + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
+                  </div>
+                </div>
+
+                {/* Children */}
+                <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-[22px] text-[#181E4B]">Children <span className="text-[18px] font-normal text-gray-600">(Age: 2-11)</span></span>
+                    <p className="text-[18px] text-[#000000] mt-1">From {finalChildPrice} {currency}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button onClick={() => setChildren(Math.max(0, children - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
+                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{children}</span>
+                    <button onClick={() => setChildren(children + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
+                  </div>
+                </div>
+
+                {/* Infants */}
+                <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-[22px] text-[#181E4B]">Infants <span className="text-[18px] font-normal text-gray-600">(Age: 0-1)</span></span>
+                    <p className="text-[18px] text-[#000000] mt-1">{finalInfantPrice === 0 ? 'Free' : `From ${finalInfantPrice} ${currency}`}</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button onClick={() => setInfants(Math.max(0, infants - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
+                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{infants}</span>
+                    <button onClick={() => setInfants(infants + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+
+            {/* Inclusions */}
             {inclusions && inclusions.length > 0 && (
               <>
                 <div className="border-t border-gray-200 my-4"></div>
@@ -253,7 +291,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         <div className="bg-[#E8E8E8] px-6 py-4 flex items-center justify-between">
           <div>
             <p className="text-[24px] text-[#000000]">Total Price</p>
-            <p className="text-[#181E4B] font-bold text-[24px]">{totalPrice} {currency}</p>
+            <p className="text-[#181E4B] font-bold text-[24px]">{calculateTotal()} {currency}</p>
           </div>
           
           <div className="flex gap-3">
@@ -261,7 +299,14 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
               Add To Cart
             </button>
             <button 
-              onClick={() => onBookNow && onBookNow({ adults, children, infants, totalPrice })}
+              onClick={() => onBookNow && onBookNow({ 
+                  adults: pricingType === 'person' ? adults : 0, 
+                  children: pricingType === 'person' ? children : 0, 
+                  infants: pricingType === 'person' ? infants : 0,
+                  guests: pricingType === 'group' ? guests : 0,
+                  items: pricingType === 'group' ? items : 0,
+                  totalPrice: calculateTotal() 
+              })}
               className="px-8 py-3 bg-[#F85E46] text-white text-[24px] font-medium rounded-lg hover:bg-[#e54d36] transition-colors"
             >
               Book Now
