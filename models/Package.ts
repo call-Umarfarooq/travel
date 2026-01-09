@@ -19,25 +19,31 @@ export interface IPackage extends Document {
   rating: number;
   location: string;
   description: string;
+  tags?: string[];
   
   tourOptions: {
     title: string;
     duration: string;
     time: string;
+    description?: string;
     
     pricingType?: 'person' | 'group';
     minPax?: number;
     maxPax?: number;
     
     adultPrice?: number;
+    adultAgeRange?: string;
     childPrice?: number;
+    childAgeRange?: string;
     infantPrice?: number;
+    infantAgeRange?: string;
     groupPrice?: number;
     
     penalty: string;
     currency: string;
     features: { icon: string; label: string }[];
     inclusions?: string[];
+    extraServices?: { name: string; price: string }[];
     pricePerPerson?: number; 
   }[];
 
@@ -52,39 +58,71 @@ export interface IPackage extends Document {
   updatedAt: Date;
 }
 
+// Tour Option Schema
+const TourOptionSchema = new mongoose.Schema({
+  title: String,
+  duration: String,
+  time: String,
+  description: String,
+  
+  // Pricing
+  pricingType: { type: String, enum: ['person', 'group'], default: 'person' },
+  minPax: { type: Number, default: 1 },
+  maxPax: Number,
+  
+  adultPrice: Number,
+  adultAgeRange: String,
+  childPrice: Number,
+  childAgeRange: String,
+  infantPrice: Number,
+  infantAgeRange: String,
+  
+  // Group Pricing
+  groupPrice: Number,
+  
+  penalty: String,
+  currency: { type: String, default: 'AED' },
+  features: [{ icon: String, label: String }],
+  inclusions: [String],
+  extraServices: [{ 
+    name: String, 
+    price: String 
+  }],
+});
+
 const PackageSchema: Schema<IPackage> = new Schema(
   {
     title: {
       type: String,
-      required: [true, 'Please provide a package title'],
+      required: [true, 'Please provide a title'],
       trim: true,
+      maxlength: [100, 'Title cannot be more than 100 characters'],
     },
     slug: {
       type: String,
-      required: [true, 'Please provide a slug'],
       unique: true,
-      trim: true,
+      index: true,
     },
     category: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
-      required: [true, 'Please select a category'],
+      required: true,
     },
     image: {
       type: String,
-      required: [true, 'Please provide a main image URL'],
+      required: [true, 'Please provide an image'],
     },
     price: {
       type: Number,
-      required: [true, 'Please provide a price'],
+      required: [true, 'Please provide price'],
     },
     discountedPrice: {
       type: Number,
     },
     // Simple display string
     duration: {
-      type: String,
-      required: [true, 'Please provide duration string'],
+      type: String, // "4 Hours" or "2 Days" (Display string)
+      required: true, 
     },
     // Structured duration
     durationDays: { type: Number, default: 0 },
@@ -100,7 +138,7 @@ const PackageSchema: Schema<IPackage> = new Schema(
     },
     rating: {
       type: Number,
-      default: 5,
+      default: 0,
     },
     location: {
       type: String,
@@ -110,29 +148,9 @@ const PackageSchema: Schema<IPackage> = new Schema(
       type: String,
       required: [true, 'Please provide a description'],
     },
+    tags: [String],
     // Detailed content
-    tourOptions: [{
-      title: String,
-      duration: String, // Keep for backward compat or specific option duration
-      time: String,
-      
-      // Pricing
-      pricingType: { type: String, enum: ['person', 'group'], default: 'person' },
-      minPax: { type: Number, default: 1 },
-      maxPax: Number,
-      
-      adultPrice: Number,
-      childPrice: Number,
-      infantPrice: Number,
-      
-      // Group Pricing
-      groupPrice: Number,
-      
-      penalty: String,
-      currency: { type: String, default: 'AED' },
-      features: [{ icon: String, label: String }],
-      inclusions: [String],
-    }],
+    tourOptions: [TourOptionSchema],
     
     features: [{
       icon: String,
@@ -162,6 +180,11 @@ const PackageSchema: Schema<IPackage> = new Schema(
     timestamps: true,
   }
 );
+
+// Prevent Mongoose Recompilation Error in Development
+if (process.env.NODE_ENV === 'development') {
+  delete mongoose.models.Package;
+}
 
 const Package: Model<IPackage> =
   mongoose.models.Package || mongoose.model<IPackage>('Package', PackageSchema);

@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 interface TourOptionCardProps {
   title: string;
   duration: string;
+  description?: string;
   features: { icon: string; label: string }[];
   penalty: string;
   time: string;
@@ -22,6 +23,7 @@ interface TourOptionCardProps {
   isExpanded?: boolean;
   selectedDate?: Date;
   inclusions?: string[];
+  extraServices?: { name: string; price: string }[];
   onBookNow?: (details: {
     adults?: number;
     children?: number;
@@ -35,6 +37,7 @@ interface TourOptionCardProps {
 const TourOptionCard: React.FC<TourOptionCardProps> = ({
   title,
   duration,
+  description,
   features,
   penalty,
   time,
@@ -49,6 +52,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   isExpanded = false,
   selectedDate,
   inclusions,
+  extraServices = [],
   onBookNow,
 }) => {
   const [expanded, setExpanded] = useState(isExpanded);
@@ -61,6 +65,9 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   // Group Mode State
   const [guests, setGuests] = useState(1);
   const [items, setItems] = useState(1);
+
+  // Extra Services State
+  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
 
   // Backward compatibility
   const finalAdultPrice = adultPrice ?? pricePerPerson ?? 253.50;
@@ -93,16 +100,33 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
     }
   };
 
+  const toggleExtraService = (index: number) => {
+    setSelectedExtras(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index) 
+        : [...prev, index]
+    );
+  };
+
   // Calculate Total
   const calculateTotal = () => {
+    let baseTotal = 0;
+    
     if (pricingType === 'group') {
-      return (items * finalGroupPrice).toFixed(2);
+      baseTotal = (items * finalGroupPrice);
+    } else {
+      baseTotal = (finalAdultPrice * adults) + (finalChildPrice * children) + (finalInfantPrice * infants);
     }
-    return (
-      (finalAdultPrice * adults) + 
-      (finalChildPrice * children) + 
-      (finalInfantPrice * infants)
-    ).toFixed(2);
+
+    // Add selected extras
+    const extrasTotal = selectedExtras.reduce((sum, idx) => {
+      // Handle price as string or number
+      const priceStr = extraServices[idx]?.price || '0';
+      const price = parseFloat(priceStr.toString());
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+
+    return (baseTotal + extrasTotal).toFixed(2);
   };
 
   return (
@@ -133,9 +157,14 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
           {features.map((feature, index) => (
             <React.Fragment key={index}>
               <div className="flex items-center gap-2 text-[20px] text-[#000000]">
+                {/* Render icon - support predefined icons or use direct emoji/text */}
                 {feature.icon === 'car' && <span className="text-[#F85E46]">🚗</span>}
                 {feature.icon === 'bus' && <span className="text-[#F85E46]">🚌</span>}
                 {feature.icon === 'guide' && <span className="text-[#F85E46]">🗣️</span>}
+                {/* Fallback: if not a predefined icon, display the icon value directly (for custom emojis) */}
+                {feature.icon !== 'car' && feature.icon !== 'bus' && feature.icon !== 'guide' && (
+                  <span className="text-[#F85E46]">{feature.icon}</span>
+                )}
                 <span>{feature.label}</span>
               </div>
               {index < features.length - 1 && (
@@ -156,6 +185,13 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         {expanded && (
           <>
             <div className="border-t border-gray-200 my-4"></div>
+            
+            {/* Description */}
+            {description && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-700">{description}</p>
+              </div>
+            )}
 
             {/* Selected Date */}
             {selectedDate && (
@@ -172,6 +208,8 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                  {time}
                </span>
             </div>
+
+    
 
             {/* --- PRICING LOGIC UI --- */}
             
@@ -258,6 +296,32 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                     <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{infants}</span>
                     <button onClick={() => setInfants(infants + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Extra Services - Rendered if available */}
+            {extraServices.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-[20px] font-semibold text-[#181E4B] mb-3">Extra Services:</h4>
+                <div className="space-y-3">
+                  {extraServices.map((service, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="checkbox" 
+                          id={`extra-${idx}`}
+                          checked={selectedExtras.includes(idx)}
+                          onChange={() => toggleExtraService(idx)}
+                          className="w-5 h-5 text-[#F85E46] rounded focus:ring-[#F85E46]"
+                        />
+                        <label htmlFor={`extra-${idx}`} className="text-[18px] text-gray-800 cursor-pointer select-none">
+                          {service.name}
+                        </label>
+                      </div>
+                      <span className="font-medium text-[#F85E46]">{service.price} {currency}</span>
+                     </div>
+                  ))}
                 </div>
               </div>
             )}

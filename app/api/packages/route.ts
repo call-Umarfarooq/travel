@@ -120,6 +120,10 @@ export async function POST(request: Request) {
     try {
         if (tourOptionsJson) {
             tourOptions = JSON.parse(tourOptionsJson);
+            console.log('DEBUG: Parsed Tour Options:', JSON.stringify(tourOptions, null, 2));
+            tourOptions.forEach((opt: any, idx: number) => {
+                console.log(`DEBUG: Option ${idx} Extra Services:`, opt.extraServices);
+            });
         }
     } catch (e) {
         console.error("Failed to parse tourOptions", e);
@@ -142,7 +146,7 @@ export async function POST(request: Request) {
         console.error("Failed to parse itinerary", e);
     }
 
-    // Parse Extra Services
+    // Parse Extra Services (Legacy/Global)
     const extraServicesJson = formData.get('extraServices') as string;
     let extraServices = [];
     try {
@@ -151,6 +155,17 @@ export async function POST(request: Request) {
         }
     } catch (e) {
         console.error("Failed to parse extraServices", e);
+    }
+    
+    // Parse Tags
+    const tagsJson = formData.get('tags') as string;
+    let tags: string[] = [];
+    try {
+        if (tagsJson) {
+            tags = JSON.parse(tagsJson);
+        }
+    } catch (e) {
+        console.error("Failed to parse tags", e);
     }
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -176,6 +191,7 @@ export async function POST(request: Request) {
       features: features, 
       itinerary: itinerary,
       extraServices: extraServices,
+      tags: tags,
       gallery: galleryUrls,
     });
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import dynamic from 'next/dynamic';
@@ -25,6 +26,8 @@ export default function CreatePackagePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   
+  const router = useRouter();
+
   // Form State
   const [formData, setFormData] = useState({
     title: '',
@@ -35,6 +38,7 @@ export default function CreatePackagePage() {
     maxAge: '',
     description: '',
     category: '',
+    tags: [] as string[]
   });
 
   // Duration State
@@ -42,6 +46,18 @@ export default function CreatePackagePage() {
   const [durationUnit, setDurationUnit] = useState('Days');
 
   const [missingFields, setMissingFields] = useState<string[]>([]);
+
+  // Tags handlers
+  const [tagInput, setTagInput] = useState('');
+  const addTag = () => {
+    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, tagInput.trim()] }));
+      setTagInput('');
+    }
+  };
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({ ...prev, tags: prev.tags.filter(tag => tag !== tagToRemove) }));
+  };
 
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -69,10 +85,7 @@ export default function CreatePackagePage() {
     { day: 1, title: 'Arrival', description: '' }
   ]);
 
-  // Extra Services State
-  const [extraServices, setExtraServices] = useState([
-    { name: '', price: '', type: 'person' } // type: person, group, fixed
-  ]);
+
 
   // Tour Options State (Pricing)
   const [tourOptions, setTourOptions] = useState([
@@ -80,19 +93,24 @@ export default function CreatePackagePage() {
       title: 'Standard Tour',
       duration: '4 Hours',
       time: '14:00',
+      description: '',
       pricingType: 'person', // person or group
       minPax: 1,
       maxPax: 100,
       adultPrice: '',
+      adultAgeRange: '12-99',
       childPrice: '',
+      childAgeRange: '2-11',
       infantPrice: '0',
+      infantAgeRange: '0-1',
       groupPrice: '',
       penalty: '24 Hours Before: 100% Penalty',
       features: [
-        { icon: 'car', label: 'Pickup Included' },
-        { icon: 'guide', label: 'Live Guide' }
+        { icon: '🚗', label: 'Pickup Included' },
+        { icon: '🗣️', label: 'Live Guide' }
       ],
-      inclusions: ['Water']
+      inclusions: [],
+      extraServices: [] as { name: string; price: string }[]
     }
   ]);
 
@@ -131,19 +149,6 @@ export default function CreatePackagePage() {
     setItinerary(itinerary.filter((_, i) => i !== index));
   };
 
-  // Extra Services
-  const handleExtraServiceChange = (index: number, field: string, value: string) => {
-    const newServices = [...extraServices];
-    (newServices[index] as any)[field] = value;
-    setExtraServices(newServices);
-  };
-  const addExtraService = () => {
-    setExtraServices([...extraServices, { name: '', price: '', type: 'person' }]);
-  };
-  const removeExtraService = (index: number) => {
-    setExtraServices(extraServices.filter((_, i) => i !== index));
-  };
-
   // Features
   const handleFeatureChange = (index: number, field: string, value: string) => {
     const newFeatures = [...features];
@@ -155,10 +160,31 @@ export default function CreatePackagePage() {
   const handleTourOptionChange = (index: number, field: string, value: any) => {
     const newOptions = [...tourOptions];
     if (field === 'features' || field === 'inclusions') {
-       // Skipped complex array edit for MVP
+       // Handled by dedicated feature handlers below
     } else {
         (newOptions[index] as any)[field] = value;
     }
+    setTourOptions(newOptions);
+  };
+
+  // Tour Option Features
+  const handleTourOptionFeatureChange = (optionIdx: number, featureIdx: number, field: string, value: string) => {
+    const newOptions = [...tourOptions];
+    const newFeatures = [...newOptions[optionIdx].features];
+    newFeatures[featureIdx] = { ...newFeatures[featureIdx], [field]: value };
+    newOptions[optionIdx].features = newFeatures;
+    setTourOptions(newOptions);
+  };
+
+  const addTourOptionFeature = (optionIdx: number) => {
+    const newOptions = [...tourOptions];
+    newOptions[optionIdx].features.push({ icon: '✨', label: 'New Feature' });
+    setTourOptions(newOptions);
+  };
+
+  const removeTourOptionFeature = (optionIdx: number, featureIdx: number) => {
+    const newOptions = [...tourOptions];
+    newOptions[optionIdx].features = newOptions[optionIdx].features.filter((_, i) => i !== featureIdx);
     setTourOptions(newOptions);
   };
   const addTourOption = () => {
@@ -166,20 +192,47 @@ export default function CreatePackagePage() {
       title: 'New Option',
       duration: '4 Hours',
       time: '10:00',
+      description: '',
       pricingType: 'person',
       minPax: 1,
       maxPax: 50,
       adultPrice: '',
+      adultAgeRange: '12-99',
       childPrice: '',
+      childAgeRange: '2-11',
       infantPrice: '0',
+      infantAgeRange: '0-1',
       groupPrice: '',
       penalty: 'Free Cancellation',
-      features: [{ icon: 'car', label: 'Transfer' }],
-      inclusions: []
+      features: [
+        { icon: '🚗', label: 'Pickup Included' },
+        { icon: '🗣️', label: 'Live Guide' }
+      ],
+      inclusions: [],
+      extraServices: [] as { name: string; price: string }[]
     }]);
   };
   const removeTourOption = (index: number) => {
     setTourOptions(tourOptions.filter((_, i) => i !== index));
+  };
+
+  // Extra Service Handlers for Tour Options
+  const addExtraServiceToOption = (optionIndex: number) => {
+    const newOptions = [...tourOptions];
+    newOptions[optionIndex].extraServices.push({ name: '', price: '' });
+    setTourOptions(newOptions);
+  };
+  
+  const removeExtraServiceFromOption = (optionIndex: number, serviceIndex: number) => {
+    const newOptions = [...tourOptions];
+    newOptions[optionIndex].extraServices.splice(serviceIndex, 1);
+    setTourOptions(newOptions);
+  };
+  
+  const handleExtraServiceChange = (optionIndex: number, serviceIndex: number, field: string, value: string) => {
+    const newOptions = [...tourOptions];
+    (newOptions[optionIndex].extraServices[serviceIndex] as any)[field] = value;
+    setTourOptions(newOptions);
   };
 
   // Image Handlers
@@ -209,23 +262,56 @@ export default function CreatePackagePage() {
     setIsLoading(true);
     setMessage('');
 
-    if (!image) { alert('Please select a main image'); setIsLoading(false); return; }
-    if (!formData.category) { alert('Please select a category'); setIsLoading(false); return; }
-
     // Validation
-    const required = ['title', 'price', 'location', 'description', 'category'];
-    const missing = required.filter(field => !formData[field as keyof typeof formData]);
+    const missing = [];
     
-    if (!image) missing.push('image');
-    if (!durationValue) missing.push('duration');
+    console.log('=== FORM VALIDATION DEBUG ===');
+    console.log('Form Data:', formData);
+    
+    if (!formData.title) {
+      missing.push('title');
+      console.error('❌ Missing: Package Title');
+    }
+    if (!formData.location) {
+      missing.push('location');
+      console.error('❌ Missing: Location');
+    }
+    if (!formData.category) {
+      missing.push('category');
+      console.error('❌ Missing: Category');
+    }
+    if (!formData.description) {
+      missing.push('description');
+      console.error('❌ Missing: Description');
+    }
+    if (!image) {
+      missing.push('image');
+      console.error('❌ Missing: Cover Image');
+    }
+    if (galleryFiles.length === 0) {
+      missing.push('gallery');
+      console.error('❌ Missing: Gallery Images (at least one required)');
+    }
+
+    console.log('Tour Options:', tourOptions);
+    console.log('Features:', features);
+    console.log('Itinerary:', itinerary);
+    console.log('Highlights:', highlights);
+    console.log('Includes:', includes);
+    console.log('Tags:', formData.tags);
 
     if (missing.length > 0) {
-        setMissingFields(missing);
-        setMessage('Please fill in all required fields.');
-        setIsLoading(false);
-        window.scrollTo(0, 0);
-        return;
+      setMissingFields(missing);
+      setMessage(`Please fill in all required fields: ${missing.join(', ')}`);
+      console.error('❌ VALIDATION FAILED - Missing fields:', missing);
+      console.log('=== END VALIDATION DEBUG ===');
+      setIsLoading(false);
+      window.scrollTo(0, 0);
+      return;
     }
+
+    console.log('✅ All required fields present!');
+    console.log('=== END VALIDATION DEBUG ===');
 
     try {
       const data = new FormData();
@@ -233,12 +319,14 @@ export default function CreatePackagePage() {
       data.append('title', formData.title);
       data.append('price', formData.price);
       data.append('location', formData.location);
-      // duration is calculated below
       data.append('description', formData.description);
       data.append('category', formData.category);
-      data.append('image', image);
+      if (image) data.append('image', image);
       
-      // Calculate Duration
+      // Tags
+      data.append('tags', JSON.stringify(formData.tags));
+      
+      // Calculate Duration (backward compatibility)
       const dVal = Number(durationValue) || 0;
       if (durationUnit === 'Days') {
           data.append('durationDays', dVal.toString());
@@ -274,11 +362,6 @@ export default function CreatePackagePage() {
 
       // Itinerary & Services
       data.append('itinerary', JSON.stringify(itinerary));
-      const cleanedServices = extraServices.filter(s => s.name).map(s => ({
-          ...s,
-          price: Number(s.price) || 0
-      }));
-      data.append('extraServices', JSON.stringify(cleanedServices));
 
       galleryFiles.forEach(file => data.append('gallery', file));
 
@@ -359,43 +442,43 @@ export default function CreatePackagePage() {
                 </div>
              </div>
 
-             {/* Duration & Age */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Duration Group */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-                    <div className="flex gap-0">
-                        <input 
-                            type="number" 
-                            value={durationValue} 
-                            onChange={(e) => setDurationValue(e.target.value)} 
-                            className={`w-24 px-4 py-2 border border-r-0 rounded-l-lg focus:ring-2 focus:ring-primary focus:border-transparent ${missingFields.includes('duration') ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-                            placeholder="1" 
-                        />
-                        <select 
-                            value={durationUnit} 
-                            onChange={(e) => setDurationUnit(e.target.value)}
-                            className="px-4 py-2 border rounded-r-lg bg-gray-50 focus:ring-2 focus:ring-primary focus:border-transparent min-w-[100px]"
-                        >
-                            <option value="Days">Days</option>
-                            <option value="Hours">Hours</option>
-                        </select>
-                    </div>
+             {/* Tags */}
+             <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Tags</label>
+                <div className="flex gap-2">
+                    <input 
+                        type="text" 
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                        className="flex-1 px-4 py-2 border rounded-lg" 
+                        placeholder="Add a tag and press Enter"
+                    />
+                    <button 
+                        type="button"
+                        onClick={addTag}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        Add Tag
+                    </button>
                 </div>
-                
-                {/* Age placeholders */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Age</label>
-                        <input type="number" name="minAge" value={formData.minAge} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg" placeholder="0" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Age</label>
-                        <input type="number" name="maxAge" value={formData.maxAge} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg" placeholder="99" />
-                    </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.tags.map((tag, index) => (
+                        <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm flex items-center gap-2">
+                            {tag}
+                            <button 
+                                type="button"
+                                onClick={() => removeTag(tag)}
+                                className="text-blue-700 hover:text-blue-900"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
                 </div>
              </div>
           </section>
+
 
           {/* Section 2: Media */}
           <section className="space-y-6">
@@ -450,7 +533,7 @@ export default function CreatePackagePage() {
                     <div className="h-48 mb-8"><ReactQuill theme="snow" value={highlights} onChange={setHighlights} className="h-full" /></div>
                  </div>
                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Includes</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Includes/Excludes</label>
                     <div className="h-48 mb-8"><ReactQuill theme="snow" value={includes} onChange={setIncludes} className="h-full" /></div>
                  </div>
              </div>
@@ -507,71 +590,171 @@ export default function CreatePackagePage() {
                                </div>
                            </div>
 
-                           {/* Conditional Pricing Inputs */}
-                           <div className="bg-gray-50 p-4 rounded-lg">
-                               <h5 className="text-sm font-semibold mb-3 text-gray-700">Prices</h5>
-                               {option.pricingType === 'person' ? (
-                                   <div className="grid grid-cols-3 gap-4">
-                                       <div>
-                                           <label className="block text-xs text-gray-500 mb-1">Adult Price</label>
-                                           <input type="number" placeholder="0.00" value={option.adultPrice} onChange={(e) => handleTourOptionChange(idx, 'adultPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-                                       </div>
-                                       <div>
-                                           <label className="block text-xs text-gray-500 mb-1">Child Price</label>
-                                           <input type="number" placeholder="0.00" value={option.childPrice} onChange={(e) => handleTourOptionChange(idx, 'childPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-                                       </div>
-                                       <div>
-                                           <label className="block text-xs text-gray-500 mb-1">Infant Price</label>
-                                           <input type="number" placeholder="0.00" value={option.infantPrice} onChange={(e) => handleTourOptionChange(idx, 'infantPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-                                       </div>
-                                   </div>
-                               ) : (
-                                   <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                           <label className="block text-xs text-gray-500 mb-1">Group Price</label>
-                                           <input type="number" placeholder="0.00" value={option.groupPrice} onChange={(e) => handleTourOptionChange(idx, 'groupPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-                                       </div>
-                                       <div>
-                                           <label className="block text-xs text-gray-500 mb-1">Capacity (Guests per Unit)</label>
-                                           <input type="number" placeholder="e.g. 4" value={option.maxPax} onChange={(e) => handleTourOptionChange(idx, 'maxPax', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-                                       </div>
-                                   </div>
-                               )}
+                           {/* Description */}
+                           <div className="mb-4">
+                               <label className="block text-xs text-gray-500 mb-1">Description (Optional)</label>
+                               <textarea 
+                                   value={option.description} 
+                                   onChange={(e) => handleTourOptionChange(idx, 'description', e.target.value)} 
+                                   className="w-full px-3 py-2 border rounded-lg" 
+                                   rows={2}
+                                   placeholder="Add a description for this tour option..."
+                               />
                            </div>
+
+
+                            {/* Conditional Pricing Inputs */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h5 className="text-sm font-semibold mb-3 text-gray-700">Prices</h5>
+                                {option.pricingType === 'person' ? (
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {/* Adult Pricing */}
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">Adult Min And Max Age</label>
+                                            <input type="text" placeholder="12-99" value={option.adultAgeRange} onChange={(e) => handleTourOptionChange(idx, 'adultAgeRange', e.target.value)} className="w-full px-3 py-2 border rounded-lg mb-2" />
+                                            <label className="block text-xs text-gray-500 mb-1">Adult Price</label>
+                                            <input type="number" placeholder="0.00" value={option.adultPrice} onChange={(e) => handleTourOptionChange(idx, 'adultPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                        </div>
+                                        {/* Child Pricing */}
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">Child Min And Max Age</label>
+                                            <input type="text" placeholder="2-11" value={option.childAgeRange} onChange={(e) => handleTourOptionChange(idx, 'childAgeRange', e.target.value)} className="w-full px-3 py-2 border rounded-lg mb-2" />
+                                            <label className="block text-xs text-gray-500 mb-1">Child Price</label>
+                                            <input type="number" placeholder="0.00" value={option.childPrice} onChange={(e) => handleTourOptionChange(idx, 'childPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                        </div>
+                                        {/* Infant Pricing */}
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">Infant Min And Max Age</label>
+                                            <input type="text" placeholder="0-1" value={option.infantAgeRange} onChange={(e) => handleTourOptionChange(idx, 'infantAgeRange', e.target.value)} className="w-full px-3 py-2 border rounded-lg mb-2" />
+                                            <label className="block text-xs text-gray-500 mb-1">Infant Price</label>
+                                            <input type="number" placeholder="0.00" value={option.infantPrice} onChange={(e) => handleTourOptionChange(idx, 'infantPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-4">
+                                         <div>
+                                            <label className="block text-xs text-gray-500 mb-1">Group Price</label>
+                                            <input type="number" placeholder="0.00" value={option.groupPrice} onChange={(e) => handleTourOptionChange(idx, 'groupPrice', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">Capacity (Guests per Unit)</label>
+                                            <input type="number" placeholder="e.g. 4" value={option.maxPax} onChange={(e) => handleTourOptionChange(idx, 'maxPax', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+
+                            {/* Duration & Penalty */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Duration (e.g. "4 Hours")</label>
+                                    <input type="text" placeholder="e.g. 4 Hours" value={option.duration} onChange={(e) => handleTourOptionChange(idx, 'duration', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Cancellation Penalty</label>
+                                    <input type="text" placeholder="e.g. 24 Hours Before: 100% Penalty" value={option.penalty} onChange={(e) => handleTourOptionChange(idx, 'penalty', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                                </div>
+                            </div>
+
+                            {/* Features Section */}
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h5 className="text-sm font-semibold text-gray-700">Features (Shown on Card)</h5>
+                                    <button type="button" onClick={() => addTourOptionFeature(idx)} className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700">+ Add Feature</button>
+                                </div>
+                                <div className="space-y-2">
+                                    {option.features.map((feature, fIdx) => (
+                                        <div key={fIdx} className="flex gap-2 items-center bg-white p-2 rounded-lg">
+                                            <div className="w-20">
+                                                <label className="block text-xs text-gray-400 mb-1">Icon</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={feature.icon} 
+                                                    onChange={(e) => handleTourOptionFeatureChange(idx, fIdx, 'icon', e.target.value)} 
+                                                    className="w-full px-2 py-1 border rounded text-center text-xl" 
+                                                    placeholder="🚗"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <label className="block text-xs text-gray-400 mb-1">Label</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={feature.label} 
+                                                    onChange={(e) => handleTourOptionFeatureChange(idx, fIdx, 'label', e.target.value)} 
+                                                    className="w-full px-2 py-1 border rounded" 
+                                                    placeholder="Feature description"
+                                                />
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => removeTourOptionFeature(idx, fIdx)} 
+                                                className="text-red-500 hover:text-red-700 mt-5 px-2"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {option.features.length === 0 && (
+                                        <p className="text-xs text-gray-500 italic">No features added yet. Click "+ Add Feature" to add one.</p>
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">💡 Tip: Use emojis like 🚗 (car), 🗣️ (guide), 🚌 (bus), or any custom icon</p>
+                            </div>
+
+                            {/* Extra Services */}
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h5 className="text-sm font-semibold text-gray-700">Extra Services</h5>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => addExtraServiceToOption(idx)} 
+                                        className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700"
+                                    >
+                                        + Add Service
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {option.extraServices.map((service, sIdx) => (
+                                        <div key={sIdx} className="flex gap-2 items-end bg-white p-2 rounded-lg">
+                                            <div className="flex-1">
+                                                <label className="block text-xs text-gray-400 mb-1">Service Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={service.name} 
+                                                    onChange={(e) => handleExtraServiceChange(idx, sIdx, 'name', e.target.value)} 
+                                                    className="w-full px-2 py-1 border rounded" 
+                                                    placeholder="e.g. Photography"
+                                                />
+                                            </div>
+                                            <div className="w-32">
+                                                <label className="block text-xs text-gray-400 mb-1">Price</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={service.price} 
+                                                    onChange={(e) => handleExtraServiceChange(idx, sIdx, 'price', e.target.value)} 
+                                                    className="w-full px-2 py-1 border rounded" 
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <button 
+                                                type="button" 
+                                                onClick={() => removeExtraServiceFromOption(idx, sIdx)} 
+                                                className="text-red-500 hover:text-red-700 px-2 pb-1"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {option.extraServices.length === 0 && (
+                                        <p className="text-xs text-gray-500 italic">No extra services added yet.</p>
+                                    )}
+                                </div>
+                            </div>
+
                       </div>
                   ))}
                </div>
-          </section>
-
-          {/* Section 6: Extra Services */}
-          <section className="space-y-6">
-              <div className="flex justify-between items-center border-b pb-2">
-                  <h2 className="text-xl font-semibold text-gray-800">Extra Services</h2>
-                  <button type="button" onClick={addExtraService} className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">+ Add Service</button>
-              </div>
-              <div className="space-y-4">
-                  {extraServices.map((service, idx) => (
-                      <div key={idx} className="flex gap-4 items-end">
-                          <div className="flex-1">
-                              <label className="block text-xs text-gray-500 mb-1">Service Name</label>
-                              <input type="text" value={service.name} onChange={(e) => handleExtraServiceChange(idx, 'name', e.target.value)} className="w-full px-3 py-2 border rounded-lg" placeholder="e.g. Photography" />
-                          </div>
-                          <div className="w-32">
-                              <label className="block text-xs text-gray-500 mb-1">Price</label>
-                              <input type="number" value={service.price} onChange={(e) => handleExtraServiceChange(idx, 'price', e.target.value)} className="w-full px-3 py-2 border rounded-lg" placeholder="0.00" />
-                          </div>
-                          <div className="w-40">
-                              <label className="block text-xs text-gray-500 mb-1">Per</label>
-                              <select value={service.type} onChange={(e) => handleExtraServiceChange(idx, 'type', e.target.value)} className="w-full px-3 py-2 border rounded-lg">
-                                  <option value="person">Per Person</option>
-                                  <option value="group">Per Group</option>
-                                  <option value="fixed">Fixed Price</option>
-                              </select>
-                          </div>
-                          <button type="button" onClick={() => removeExtraService(idx)} className="text-red-500 p-2 hover:bg-red-50 rounded-lg">X</button>
-                      </div>
-                  ))}
-              </div>
           </section>
 
           {/* Features Grid (Existing, simplified) */}
