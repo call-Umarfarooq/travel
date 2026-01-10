@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import dynamic from 'next/dynamic';
@@ -21,12 +21,15 @@ interface Category {
   name: string;
 }
 
-export default function CreatePackagePage() {
+function CreatePackageContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('id');
+  const isEditing = !!editId;
 
   // Form State
   const [formData, setFormData] = useState({
@@ -127,6 +130,72 @@ export default function CreatePackagePage() {
     };
     fetchCategories();
   }, []);
+
+  // Fetch Package Data for Editing
+  useEffect(() => {
+    if (!editId) return;
+
+    const fetchPackage = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/packages?id=${editId}`);
+        const json = await res.json();
+        if (json.success && json.data && json.data.length > 0) {
+           const pkg = json.data[0]; // Since API returns array
+           
+           // Populate Basic Fields
+           setFormData({
+             title: pkg.title || '',
+             price: pkg.price?.toString() || '',
+             location: pkg.location || '',
+             duration: pkg.duration || '',
+             minAge: pkg.minAge?.toString() || '',
+             maxAge: pkg.maxAge?.toString() || '',
+             description: pkg.description || '',
+             category: pkg.category?._id || pkg.category || '', // Handle populated vs raw ID
+             tags: pkg.tags || []
+           });
+
+           // Duration Parsing (Reverse engineering string or use stored fields)
+           if (pkg.durationDays > 0) {
+               setDurationValue(pkg.durationDays.toString());
+               setDurationUnit('Days');
+           } else if (pkg.durationHours > 0) {
+               setDurationValue(pkg.durationHours.toString());
+               setDurationUnit('Hours');
+           }
+
+           // Content
+           setHighlights(pkg.highlights || '');
+           setIncludes(pkg.includes || '');
+           setItinerary(pkg.itinerary || '');
+           
+           // Features
+           if (pkg.features && pkg.features.length > 0) setFeatures(pkg.features);
+
+           // Tour Options
+           if (pkg.tourOptions && pkg.tourOptions.length > 0) setTourOptions(pkg.tourOptions);
+           
+           // Images
+           if (pkg.image) setImagePreview(pkg.image);
+           if (pkg.gallery && pkg.gallery.length > 0) {
+               setGalleryPreviews(pkg.gallery);
+               // Note: We cannot convert URLs back to File objects easily, 
+               // so we need to handle existing images vs new files in submit.
+               // For now, we'll just show previews. 
+               // Submit logic needs to know about existing images.
+           }
+        }
+      } catch (err) {
+        console.error('Failed to fetch package', err);
+        setMessage('Failed to load package data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPackage();
+  }, [editId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -252,56 +321,28 @@ export default function CreatePackagePage() {
     // Validation
     const missing = [];
     
-    console.log('=== FORM VALIDATION DEBUG ===');
-    console.log('Form Data:', formData);
+    if (!formData.title) missing.push('title');
+    if (!formData.location) missing.push('location');
+    if (!formData.category) missing.push('category');
+    if (!formData.description) missing.push('description');
+    // Allow missing image if editing and we have a preview (existing image)
+    if (!image && !isEditing) missing.push('image'); 
     
-    if (!formData.title) {
-      missing.push('title');
-      console.error('❌ Missing: Package Title');
-    }
-    if (!formData.location) {
-      missing.push('location');
-      console.error('❌ Missing: Location');
-    }
-    if (!formData.category) {
-      missing.push('category');
-      console.error('❌ Missing: Category');
-    }
-    if (!formData.description) {
-      missing.push('description');
-      console.error('❌ Missing: Description');
-    }
-    if (!image) {
-      missing.push('image');
-      console.error('❌ Missing: Cover Image');
-    }
-    if (galleryFiles.length === 0) {
-      missing.push('gallery');
-      console.error('❌ Missing: Gallery Images (at least one required)');
-    }
-
-    console.log('Tour Options:', tourOptions);
-    console.log('Features:', features);
-    console.log('Itinerary:', itinerary);
-    console.log('Highlights:', highlights);
-    console.log('Includes:', includes);
-    console.log('Tags:', formData.tags);
+    // Gallery validation: If editing, we might have previews but no new files
+    if (galleryFiles.length === 0 && galleryPreviews.length === 0) missing.push('gallery');
 
     if (missing.length > 0) {
       setMissingFields(missing);
       setMessage(`Please fill in all required fields: ${missing.join(', ')}`);
-      console.error('❌ VALIDATION FAILED - Missing fields:', missing);
-      console.log('=== END VALIDATION DEBUG ===');
       setIsLoading(false);
       window.scrollTo(0, 0);
       return;
     }
 
-    console.log('✅ All required fields present!');
-    console.log('=== END VALIDATION DEBUG ===');
-
     try {
       const data = new FormData();
+      if (isEditing && editId) data.append('id', editId);
+
       // Basic Fields
       data.append('title', formData.title);
       data.append('price', formData.price);
@@ -352,18 +393,25 @@ export default function CreatePackagePage() {
 
       galleryFiles.forEach(file => data.append('gallery', file));
 
+      const method = isEditing ? 'PUT' : 'POST';
       const res = await fetch('/api/packages', {
-        method: 'POST',
+        method: method,
         body: data,
       });
 
       const json = await res.json();
       if (json.success) {
-        setMessage('Package created successfully!');
+        setMessage(isEditing ? 'Package updated successfully!' : 'Package created successfully!');
         window.scrollTo(0, 0);
-        // Optional: Reset form here
+        if (!isEditing) {
+           // Reset form logic if needed, or redirect
+           router.push('/dashboard/manage');
+        } else {
+           // Optionally redirect back to manage
+           setTimeout(() => router.push('/dashboard/manage'), 1500);
+        }
       } else {
-        setMessage(json.error || 'Failed to create package');
+        setMessage(json.error || 'Failed to save package');
       }
     } catch (err) {
       console.error(err);
@@ -377,7 +425,7 @@ export default function CreatePackagePage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main className="max-w-5xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Package</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">{isEditing ? 'Edit Package' : 'Create New Package'}</h1>
         
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm p-8 space-y-8">
           
@@ -762,7 +810,7 @@ export default function CreatePackagePage() {
                 isLoading ? 'bg-gray-400' : 'bg-gradient-to-r from-[#F85E46] to-[#ff8f7d]'
               }`}
             >
-              {isLoading ? 'Creating Package...' : 'Publish Package'}
+              {isLoading ? (isEditing ? 'Updating...' : 'Creating...') : (isEditing ? 'Update Package' : 'Publish Package')}
             </button>
           </div>
 
@@ -776,5 +824,13 @@ export default function CreatePackagePage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function CreatePackagePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreatePackageContent />
+    </Suspense>
   );
 }

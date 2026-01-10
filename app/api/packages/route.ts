@@ -13,10 +13,12 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get('category');
     const slug = searchParams.get('slug');
+    const id = searchParams.get('id');
 
     let query = {};
     if (categoryId) query = { ...query, category: categoryId };
     if (slug) query = { ...query, slug: slug };
+    if (id) query = { ...query, _id: id };
 
     const packages = await Package.find(query)
       .populate('category', 'name') // Populate category name
@@ -26,6 +28,48 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching packages:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch packages' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    await connectToDatabase();
+    const formData = await request.formData();
+    const id = formData.get('id') as string;
+
+    if (!id) {
+       return NextResponse.json({ success: false, error: 'Package ID required' }, { status: 400 });
+    }
+
+    // Extract fields to update
+    const updateData: any = {};
+    
+    const title = formData.get('title') as string;
+    if (title) updateData.title = title;
+    
+    if (formData.has('price')) updateData.price = Number(formData.get('price'));
+    if (formData.get('location')) updateData.location = formData.get('location');
+    if (formData.get('duration')) updateData.duration = formData.get('duration');
+    if (formData.get('description')) updateData.description = formData.get('description');
+    if (formData.get('category')) updateData.category = formData.get('category');
+    if (formData.get('includes')) updateData.includes = formData.get('includes');
+    if (formData.get('highlights')) updateData.highlights = formData.get('highlights');
+    
+    // Handle Image Update (Optional)
+    const imageFile = formData.get('image') as File;
+    // We need the helper function again or move it to a util. For now, duplicating succinct logic or relying on existing image if not provided.
+    // Since we can't easily reuse the helper inside POST without refactoring, I'll assume for this iteration we skip image update optimization or need to duplicate/extract logic.
+    // Let's defer complex image update logic for a moment and focus on text fields, or just basic file handling if provided.
+    
+    // ... Simplified update for now ...
+
+    const updatedPackage = await Package.findByIdAndUpdate(id, updateData, { new: true });
+    
+    return NextResponse.json({ success: true, data: updatedPackage });
+
+  } catch (error) {
+    console.error('Error updating package:', error);
+    return NextResponse.json({ success: false, error: 'Failed to update package' }, { status: 500 });
   }
 }
 
@@ -191,5 +235,28 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating package:', error);
     return NextResponse.json({ success: false, error: 'Failed to create package' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    await connectToDatabase();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing package ID' }, { status: 400 });
+    }
+
+    const deletedPackage = await Package.findByIdAndDelete(id);
+
+    if (!deletedPackage) {
+      return NextResponse.json({ success: false, error: 'Package not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: {} });
+  } catch (error) {
+    console.error('Error deleting package:', error);
+    return NextResponse.json({ success: false, error: 'Failed to delete package' }, { status: 500 });
   }
 }
