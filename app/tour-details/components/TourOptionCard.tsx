@@ -132,7 +132,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   return (
     <div className={`rounded-2xl overflow-hidden transition-all mb-4 border-2 ${expanded ? 'border-[#F85E46] bg-[#FFF8F6]' : 'border-gray-200 bg-white'}`}>
       {/* Card Content */}
-      <div className="p-6 relative">
+      <div className="p-4 md:p-6 relative">
         {/* Collapse Arrow */}
         <button 
           onClick={() => setExpanded(!expanded)}
@@ -149,14 +149,14 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         </button>
 
         {/* Title & Duration */}
-        <h3 className="text-[24px] font-bold text-[#181E4B] mb-1">{title}</h3>
-        <p className="text-[20px] text-[#000000] mb-4">Min. Duration: {duration}</p>
+        <h3 className="text-lg md:text-[24px] font-bold text-[#181E4B] mb-1">{title}</h3>
+        <p className="text-base md:text-[20px] text-[#000000] mb-4">Min. Duration: {duration}</p>
 
         {/* Features Row */}
         <div className="flex flex-wrap items-center gap-4 mb-4">
           {features.map((feature, index) => (
             <React.Fragment key={index}>
-              <div className="flex items-center gap-2 text-[20px] text-[#000000]">
+              <div className="flex items-center gap-2 text-sm md:text-[20px] text-[#000000]">
                 {/* Render icon - support predefined icons or use direct emoji/text */}
                 {feature.icon === 'car' && <span className="text-[#F85E46]">🚗</span>}
                 {feature.icon === 'bus' && <span className="text-[#F85E46]">🚌</span>}
@@ -175,7 +175,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         </div>
 
         {/* Penalty Notice */}
-        <div className="flex items-center gap-2 text-[20px] text-[#000000] mb-6">
+        <div className="flex items-center gap-2 text-sm md:text-[20px] text-[#000000] mb-6">
           <svg className="w-[24px] h-[24px] text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -196,7 +196,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
             {/* Selected Date */}
             {selectedDate && (
               <div className="mb-4 px-4 py-2 bg-[#C5D86D]/20 rounded-lg inline-block">
-                <span className="text-[18px] text-[#181E4B] font-medium">
+                <span className="text-sm md:text-[18px] text-[#181E4B] font-medium">
                   Selected Date: {selectedDate.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
                 </span>
               </div>
@@ -223,10 +223,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
 
                  {/* Guests Row */}
                  <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
-                    <span className="font-bold text-[22px] text-[#181E4B]">Guests</span>
+                    <span className="font-bold text-lg md:text-[22px] text-[#181E4B]">Guests</span>
                     <div className="flex items-center gap-4">
                         <button onClick={() => handleGuestChange(-1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">−</button>
-                        <span className="w-8 text-center font-bold text-[22px] text-[#F85E46]">{guests}</span>
+                        <span className="w-8 text-center font-bold text-lg md:text-[22px] text-[#F85E46]">{guests}</span>
                         <button onClick={() => handleGuestChange(1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                     </div>
                  </div>
@@ -234,8 +234,8 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                  {/* Items Row */}
                  <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
                     <div>
-                        <span className="font-bold text-[20px] text-[#181E4B] block">{title}</span>
-                        <span className="text-[16px] text-[#000000]">({maxPax} Seater)</span>
+                        <span className="font-bold text-lg md:text-[20px] text-[#181E4B] block">{title}</span>
+                        <span className="text-sm md:text-[16px] text-[#000000]">({maxPax} Seater)</span>
                     </div>
                     <div className="flex items-center gap-4">
                          {/* Disabled Minus if at minimum */}
@@ -246,7 +246,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                         >
                             −
                         </button>
-                        <span className="w-8 text-center font-bold text-[22px] text-[#F85E46]">{items}</span>
+                        <span className="w-8 text-center font-bold text-lg md:text-[22px] text-[#F85E46]">{items}</span>
                         <button onClick={() => handleItemChange(1)} className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                     </div>
                  </div>
@@ -254,7 +254,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
             ) : (
               /* PERSON MODE UI */
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2 text-[18px] text-[#F85E46] font-medium mb-2">
+                <div className="flex items-center gap-2 text-base md:text-[18px] text-[#F85E46] font-medium mb-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     Number Of Participants:
                 </div>
@@ -262,12 +262,12 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                 {/* Adults */}
                 <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-[22px] text-[#181E4B]">Adults <span className="text-[18px] font-normal text-gray-600">(Age: 12-99)</span></span>
-                    <p className="text-[18px] text-[#000000] mt-1">From {finalAdultPrice} {currency}</p>
+                    <span className="font-bold text-lg md:text-[22px] text-[#181E4B]">Adults <span className="text-sm md:text-[18px] font-normal text-gray-600">(Age: 12-99)</span></span>
+                    <p className="text-sm md:text-[18px] text-[#000000] mt-1">From {finalAdultPrice} {currency}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
-                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{adults}</span>
+                    <span className="w-8 text-center font-bold text-lg md:text-[22px] text-[#000000]">{adults}</span>
                     <button onClick={() => setAdults(adults + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                   </div>
                 </div>
@@ -275,12 +275,12 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                 {/* Children */}
                 <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-[22px] text-[#181E4B]">Children <span className="text-[18px] font-normal text-gray-600">(Age: 2-11)</span></span>
-                    <p className="text-[18px] text-[#000000] mt-1">From {finalChildPrice} {currency}</p>
+                    <span className="font-bold text-lg md:text-[22px] text-[#181E4B]">Children <span className="text-sm md:text-[18px] font-normal text-gray-600">(Age: 2-11)</span></span>
+                    <p className="text-sm md:text-[18px] text-[#000000] mt-1">From {finalChildPrice} {currency}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <button onClick={() => setChildren(Math.max(0, children - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
-                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{children}</span>
+                    <span className="w-8 text-center font-bold text-lg md:text-[22px] text-[#000000]">{children}</span>
                     <button onClick={() => setChildren(children + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                   </div>
                 </div>
@@ -288,12 +288,12 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                 {/* Infants */}
                 <div className="bg-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-[22px] text-[#181E4B]">Infants <span className="text-[18px] font-normal text-gray-600">(Age: 0-1)</span></span>
-                    <p className="text-[18px] text-[#000000] mt-1">{finalInfantPrice === 0 ? 'Free' : `From ${finalInfantPrice} ${currency}`}</p>
+                    <span className="font-bold text-lg md:text-[22px] text-[#181E4B]">Infants <span className="text-sm md:text-[18px] font-normal text-gray-600">(Age: 0-1)</span></span>
+                    <p className="text-sm md:text-[18px] text-[#000000] mt-1">{finalInfantPrice === 0 ? 'Free' : `From ${finalInfantPrice} ${currency}`}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <button onClick={() => setInfants(Math.max(0, infants - 1))} className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-50 transition shadow-sm font-bold text-xl">−</button>
-                    <span className="w-8 text-center font-bold text-[22px] text-[#000000]">{infants}</span>
+                    <span className="w-8 text-center font-bold text-lg md:text-[22px] text-[#000000]">{infants}</span>
                     <button onClick={() => setInfants(infants + 1)} className="w-10 h-10 bg-[#F85E46] rounded-full flex items-center justify-center text-white hover:bg-[#e54d36] transition shadow-sm font-bold text-xl">+</button>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
             {/* Extra Services - Rendered if available */}
             {extraServices.length > 0 && (
               <div className="mb-6">
-                <h4 className="text-[20px] font-semibold text-[#181E4B] mb-3">Extra Services:</h4>
+                <h4 className="text-base md:text-[20px] font-semibold text-[#181E4B] mb-3">Extra Services:</h4>
                 <div className="space-y-3">
                   {extraServices.map((service, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
@@ -315,7 +315,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                           onChange={() => toggleExtraService(idx)}
                           className="w-5 h-5 text-[#F85E46] rounded focus:ring-[#F85E46]"
                         />
-                        <label htmlFor={`extra-${idx}`} className="text-[18px] text-gray-800 cursor-pointer select-none">
+                        <label htmlFor={`extra-${idx}`} className="text-sm md:text-[18px] text-gray-800 cursor-pointer select-none">
                           {service.name}
                         </label>
                       </div>
@@ -332,10 +332,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
               <>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div>
-                  <h4 className="text-[20px] font-semibold text-[#181E4B] mb-3">Includes:</h4>
+                  <h4 className="text-base md:text-[20px] font-semibold text-[#181E4B] mb-3">Includes:</h4>
                   <ul className="space-y-2">
                     {inclusions.map((item, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-[18px] text-[#000000]">
+                      <li key={idx} className="flex items-center gap-2 text-sm md:text-[18px] text-[#000000]">
                         <svg className="w-5 h-5 text-[#F85E46] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -352,10 +352,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
 
       {/* Footer - Only when expanded */}
       {expanded && (
-        <div className="bg-[#E8E8E8] px-6 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-[24px] text-[#000000]">Total Price</p>
-            <p className="text-[#181E4B] font-bold text-[24px]">{calculateTotal()} {currency}</p>
+        <div className="bg-[#E8E8E8] px-4 py-3 md:px-6 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <p className="text-lg md:text-[24px] text-[#000000]">Total Price</p>
+            <p className="text-[#181E4B] font-bold text-xl md:text-[24px]">{calculateTotal()} {currency}</p>
           </div>
           
           <div className="flex gap-3">
@@ -372,7 +372,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                  };
                  if(onBookNow) onBookNow({...details, action: 'add_to_cart'} as any);
               }}
-              className="px-6 py-3 bg-white border border-gray-300 text-[#000000] text-[24px] font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 md:px-6 md:py-3 bg-white border border-gray-300 text-[#000000] text-lg md:text-[24px] font-medium rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
             >
               Add To Cart
             </button>
@@ -389,7 +389,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                 };
                 if(onBookNow) onBookNow({...details, action: 'book_now'} as any);
               }}
-              className="px-8 py-3 bg-[#F85E46] text-white text-[24px] font-medium rounded-lg hover:bg-[#e54d36] transition-colors"
+              className="px-5 py-2 md:px-8 md:py-3 bg-[#F85E46] text-white text-lg md:text-[24px] font-medium rounded-lg hover:bg-[#e54d36] transition-colors whitespace-nowrap"
             >
               Book Now
             </button>

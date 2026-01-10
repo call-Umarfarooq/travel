@@ -135,16 +135,8 @@ export async function POST(request: Request) {
     const minAge = formData.get('minAge') ? Number(formData.get('minAge')) : undefined;
     const maxAge = formData.get('maxAge') ? Number(formData.get('maxAge')) : undefined;
 
-    // Parse Itinerary
-    const itineraryJson = formData.get('itinerary') as string;
-    let itinerary = [];
-    try {
-        if (itineraryJson) {
-            itinerary = JSON.parse(itineraryJson);
-        }
-    } catch (e) {
-        console.error("Failed to parse itinerary", e);
-    }
+    // Itinerary (Rich Text String)
+    const itinerary = formData.get('itinerary') as string;
 
     // Parse Extra Services (Legacy/Global)
     const extraServicesJson = formData.get('extraServices') as string;

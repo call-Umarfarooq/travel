@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import TourOptionCard from '../components/TourOptionCard';
@@ -82,6 +82,14 @@ export default function CityTourPage() {
 
   const activeData = packageData || defaultData;
   const isDynamic = !!packageData;
+
+  const optionsRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (showOptions && optionsRef.current) {
+      optionsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showOptions, selectedDate]);
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -247,14 +255,31 @@ export default function CityTourPage() {
         
            <RecentGallery images={activeData.gallery} />
 
-          <div className="flex flex-col lg:flex-row gap-8 mt-8">
+          <div className="flex flex-col lg:flex-row gap-8 md:mt-8">
             {/* Left - Tour Options & Content */}
             <div className="w-full lg:w-[70%]">
+              
+              {/* Mobile Calendar (Initial Position) - Visible when no date selected or always on mobile? 
+                  User wants it "below heading". 
+                  If showOptions is false: Heading is hidden -> Calendar is top.
+                  If showOptions is true: Heading is visible -> Calendar is below it.
+              */}
+              {showOptions && (
+                 <h2 ref={optionsRef} className="text-3xl md:text-[40px] font-bold text-center text-[#183B56] mb-8 md:mb-12 font-serif">
+                    Choose your option
+                 </h2>
+              )}
+
+              {/* Mobile Calendar Widget - Hidden on Desktop */}
+              <div className="lg:hidden mb-8">
+                 <CalendarWidget 
+                    pricePerPerson={activeData.price} 
+                    onDateSelect={handleDateSelect} 
+                 />
+              </div>
+
               {showOptions && (
                 <>
-                  <h2 className="text-[48px] font-bold text-[#000000] mb-8">
-                    Choose your option
-                  </h2>
                   {tourOptions.map((option: any, index: number) => (
                     <TourOptionCard
                       key={index}
@@ -269,10 +294,10 @@ export default function CityTourPage() {
 
               {/* About This Activity */}
               <section className="mt-16">
-                <h2 className="text-[32px] font-bold text-[#1E3A5F] mb-4">
+                <h2 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">
                   About This Activity
                 </h2>
-                <p className="text-[20px] text-[#000000] leading-relaxed mb-8">
+                <p className="text-base md:text-[20px] text-[#000000] leading-relaxed mb-8">
                   {activeData.description}
                 </p>
 
@@ -293,39 +318,48 @@ export default function CityTourPage() {
               <hr className="mt-14 border-t border-[#000000]" />
 
             {/* Itinerary Section */}
-            {activeData.itinerary && activeData.itinerary.length > 0 && (
+            {activeData.itinerary && (
               <section className="mt-8">
-                <h3 className="text-[24px] font-bold text-[#181E4B] mb-6">Itinerary</h3>
-                <div className="space-y-6">
-                  {activeData.itinerary.map((item: any, idx: number) => (
-                    <div key={idx} className="flex gap-4">
-                      {/* Day Circle */}
-                      <div className="flex flex-col items-center">
-                         <div className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                           {item.day || idx + 1}
-                         </div>
-                         {idx < activeData.itinerary.length - 1 && (
-                           <div className="w-0.5 h-full bg-gray-200 my-2"></div>
-                         )}
+                <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Itinerary</h3>
+                {Array.isArray(activeData.itinerary) && activeData.itinerary.length > 0 ? (
+                  // Legacy Array Format
+                  <div className="space-y-6">
+                    {activeData.itinerary.map((item: any, idx: number) => (
+                      <div key={idx} className="flex gap-4">
+                        {/* Day Circle */}
+                        <div className="flex flex-col items-center">
+                           <div className="w-10 h-10 rounded-full bg-[#F85E46] text-white flex items-center justify-center font-bold text-sm shrink-0">
+                             {item.day || idx + 1}
+                           </div>
+                           {idx < activeData.itinerary.length - 1 && (
+                             <div className="w-0.5 h-full bg-gray-200 my-2"></div>
+                           )}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="pb-6 w-full">
+                           <h4 className="text-[18px] md:text-[20px] font-bold text-[#181E4B] mb-2 break-words">{item.title}</h4>
+                           <p className="text-[16px] md:text-[18px] text-[#000000] leading-relaxed whitespace-pre-line break-words">
+                             {item.description}
+                           </p>
+                        </div>
                       </div>
-                      
-                      {/* Content */}
-                      <div className="pb-6">
-                         <h4 className="text-[20px] font-bold text-[#181E4B] mb-2">{item.title}</h4>
-                         <p className="text-[18px] text-[#000000] leading-relaxed whitespace-pre-line">
-                           {item.description}
-                         </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  // New HTML String Format
+                  <div 
+                    className="text-[16px] md:text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside break-words"
+                    dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.itinerary) }}
+                  />
+                )}
                 <hr className="mt-8 border-t border-[#000000]" />
               </section>
             )}
 
             {/* Highlights Section */}
             <section className="mt-8">
-              <h3 className="text-[24px] font-bold text-[#181E4B] mb-4">Highlights</h3>
+              <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Highlights</h3>
               <div 
                 className="text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.highlights) }}
@@ -337,7 +371,7 @@ export default function CityTourPage() {
 
             {/* Includes Section */}
             <section className="mt-8">
-              <h3 className="text-[24px] font-bold text-[#181E4B] mb-4">Includes</h3>
+              <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Includes</h3>
               <div 
                 className="text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.includes) }}
@@ -349,7 +383,7 @@ export default function CityTourPage() {
 
               {/* Details Section */}
               <section className="mt-8 mb-8">
-                <h3 className="text-24px] font-bold text-[#181E4B] mb-4">Details</h3>
+                <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Details</h3>
                 <p className="text-[20px] text-[#000000] leading-relaxed">
                    {activeData.description}
                 </p>
@@ -363,15 +397,15 @@ export default function CityTourPage() {
               )}
             </div>
 
-            {/* Right - Calendar & Decoration */}
-            <div className="w-full lg:w-[30%]">
+            {/* Right - Calendar & Decoration (Desktop Only) */}
+            <div className="w-full lg:w-[30%] hidden lg:block">
               <CalendarWidget 
                 pricePerPerson={activeData.price} 
                 onDateSelect={handleDateSelect} 
               />
               
               {/* Travel Decoration Image */}
-              <div className="relative h-72 mt-4">
+              <div className="relative hidden md:block h-72 mt-4">
                 <Image
                   src={activeData.image || "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800"}
                   alt="Travel decoration"

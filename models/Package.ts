@@ -48,7 +48,7 @@ export interface IPackage extends Document {
   }[];
 
   features: { icon: string; title: string; description: string }[];
-  itinerary?: { day: number; title: string; description: string }[];
+  itinerary?: any; // Changed to any to support string (new) or array (legacy) during migration
   extraServices?: { name: string; price: number; type: 'person' | 'group' | 'fixed' }[];
 
   highlights: string;
@@ -159,11 +159,10 @@ const PackageSchema: Schema<IPackage> = new Schema(
     }],
     
     // New: Itinerary
-    itinerary: [{
-      day: Number,
-      title: String,
-      description: String,
-    }],
+    itinerary: {
+      type: String,
+      required: false
+    },
 
     // New: Extra Services
     extraServices: [{

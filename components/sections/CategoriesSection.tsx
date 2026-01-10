@@ -154,17 +154,17 @@ const CategoriesSection: React.FC = () => {
   }
 
   return (
-    <section className="py-16 bg-white overflow-hidden">
+    <section className="md:py-16 py-8 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-2">
         {/* Section Title */}
         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark text-center mb-16">
           Tour Categories
         </h2>
 
-        {/* Cards Container - Full Width with drag and scroll */}
+        {/* Desktop View: Wave Animation (Hidden on mobile) */}
         <div 
           ref={containerRef}
-          className={`w-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className={`hidden md:block w-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -174,8 +174,6 @@ const CategoriesSection: React.FC = () => {
           {/* Cards Row - Wave Layout with percentage widths */}
           <div className="flex justify-between items-start w-full min-h-[380px] select-none">
             {visibleCategories.map((category, index) => {
-              // Ensure we fallback gracefully if we have fewer than 5 items and wave expects 5
-              // Though we loop to fill 5 slots in getVisibleCategories
               const config = waveConfig[index] || waveConfig[0];
               
               return (
@@ -219,8 +217,31 @@ const CategoriesSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Pagination Dots */}
-        <div className="flex justify-center gap-2 mt-5">
+        {/* Mobile View: Simple Grid (Hidden on desktop) */}
+        <div className="md:hidden grid grid-cols-2 sm:grid-cols-2 gap-4">
+             {categories.map((category, index) => (
+                <div key={index} className="flex flex-col items-center">
+                    <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-md mb-3">
+                         <Image
+                            src={category.image}
+                            alt={category.title}
+                            fill
+                            className="object-cover"
+                         />
+                    </div>
+                    <h3 className="text-sm font-bold text-dark text-center">{category.title}</h3>
+                    <Link 
+                      href={category._id ? `/travel-with-us?category=${category._id}` : '/travel-with-us'}
+                      className="text-xs text-gray-500 hover:text-primary transition-colors mt-1"
+                    >
+                      See More
+                    </Link>
+                </div>
+             ))}
+        </div>
+
+        {/* Pagination Dots (Desktop Only) */}
+        <div className="hidden md:flex justify-center gap-2 mt-5">
           {categories.map((_, index) => (
             <button
               key={index}

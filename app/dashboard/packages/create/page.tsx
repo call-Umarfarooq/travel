@@ -81,9 +81,7 @@ export default function CreatePackagePage() {
   ]);
 
   // Itinerary State
-  const [itinerary, setItinerary] = useState([
-    { day: 1, title: 'Arrival', description: '' }
-  ]);
+  const [itinerary, setItinerary] = useState('');
 
 
 
@@ -136,18 +134,7 @@ export default function CreatePackagePage() {
 
   // --- Handlers for Complex Lists ---
 
-  // Itinerary
-  const handleItineraryChange = (index: number, field: string, value: string) => {
-    const newItinerary = [...itinerary];
-    (newItinerary[index] as any)[field] = value;
-    setItinerary(newItinerary);
-  };
-  const addItineraryDay = () => {
-    setItinerary([...itinerary, { day: itinerary.length + 1, title: '', description: '' }]);
-  };
-  const removeItineraryDay = (index: number) => {
-    setItinerary(itinerary.filter((_, i) => i !== index));
-  };
+
 
   // Features
   const handleFeatureChange = (index: number, field: string, value: string) => {
@@ -361,7 +348,7 @@ export default function CreatePackagePage() {
       data.append('tourOptions', JSON.stringify(cleanedOptions));
 
       // Itinerary & Services
-      data.append('itinerary', JSON.stringify(itinerary));
+      data.append('itinerary', itinerary);
 
       galleryFiles.forEach(file => data.append('gallery', file));
 
@@ -541,21 +528,15 @@ export default function CreatePackagePage() {
 
           {/* Section 4: Itinerary */}
           <section className="space-y-6">
-              <div className="flex justify-between items-center border-b pb-2">
-                  <h2 className="text-xl font-semibold text-gray-800">Itinerary</h2>
-                  <button type="button" onClick={addItineraryDay} className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full">+ Add Day</button>
-              </div>
-              <div className="space-y-4">
-                  {itinerary.map((day, idx) => (
-                      <div key={idx} className="border rounded-lg p-4 bg-gray-50 relative">
-                          <button type="button" onClick={() => removeItineraryDay(idx)} className="absolute top-2 right-2 text-red-500 text-xs hover:text-red-700">Remove</button>
-                          <div className="flex gap-4 items-center mb-2">
-                              <span className="font-bold text-gray-600 w-16">Day {idx + 1}</span>
-                              <input type="text" placeholder="Title (e.g. Arrival in Dubai)" value={day.title} onChange={(e) => handleItineraryChange(idx, 'title', e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" />
-                          </div>
-                          <textarea placeholder="Description of the day's activities..." value={day.description} onChange={(e) => handleItineraryChange(idx, 'description', e.target.value)} rows={2} className="w-full px-3 py-2 border rounded-lg" />
-                      </div>
-                  ))}
+              <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Itinerary</h2>
+              <div className="h-48 mb-8">
+                  <ReactQuill 
+                    theme="snow" 
+                    value={itinerary} 
+                    onChange={setItinerary} 
+                    className="h-full" 
+                    placeholder="Describe the itinerary here..."
+                  />
               </div>
           </section>
 

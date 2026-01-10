@@ -23,15 +23,16 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
   const getImg = (index: number) => displayImages[index % displayImages.length];
 
   return (
-    <section className="w-full py-12">
-      <h2 className="text-[40px] font-bold text-center text-[#183B56] mb-12 font-serif">
+    <section className="w-full py-8 md:py-12">
+      <h2 className="text-3xl md:text-[40px] font-bold text-center text-[#183B56] mb-8 md:mb-12 font-serif">
         Recent Gallery
       </h2>
       
-      <div className="flex justify-center items-center gap-4 px-4 h-[500px]">
+      {/* Desktop View - Hidden on Mobile */}
+      <div className="hidden lg:flex justify-center items-center gap-4 px-4 h-[500px]">
         {/* Column 1 - Single Image */}
         <div className="flex items-center h-full">
-            <div className="relative w-[200px] h-[200px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+            <div className="relative w-[150px] h-[150px] xl:w-[200px] xl:h-[200px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(0)} 
                     alt="Gallery image 1" 
@@ -43,7 +44,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
 
         {/* Column 2 - Stacked Images */}
         <div className="flex flex-col gap-4 h-[80%] justify-center">
-             <div className="relative w-[220px] h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+             <div className="relative w-[160px] h-[130px] xl:w-[220px] xl:h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(1)} 
                     alt="Gallery image 2" 
@@ -51,7 +52,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
                     className="object-cover"
                 />
             </div>
-             <div className="relative w-[220px] h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+             <div className="relative w-[160px] h-[130px] xl:w-[220px] xl:h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(2)} 
                     alt="Gallery image 3" 
@@ -63,7 +64,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
 
         {/* Column 3 - Center Tall Image */}
         <div className="flex items-center h-full">
-            <div className="relative w-[280px] h-[450px] rounded-[3rem] overflow-hidden shadow-xl z-10 hover:scale-105 transition-transform duration-300">
+            <div className="relative w-[200px] h-[350px] xl:w-[280px] xl:h-[450px] rounded-[3rem] overflow-hidden shadow-xl z-10 hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(3)} 
                     alt="Gallery image 4" 
@@ -75,7 +76,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
 
         {/* Column 4 - Stacked Images */}
         <div className="flex flex-col gap-4 h-[80%] justify-center">
-             <div className="relative w-[220px] h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+             <div className="relative w-[160px] h-[130px] xl:w-[220px] xl:h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(4)} 
                     alt="Gallery image 5" 
@@ -83,7 +84,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
                     className="object-cover"
                 />
             </div>
-             <div className="relative w-[220px] h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+             <div className="relative w-[160px] h-[130px] xl:w-[220px] xl:h-[180px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(5)} 
                     alt="Gallery image 6" 
@@ -95,7 +96,7 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
 
         {/* Column 5 - Single Image */}
         <div className="flex items-center h-full">
-            <div className="relative w-[200px] h-[200px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
+            <div className="relative w-[150px] h-[150px] xl:w-[200px] xl:h-[200px] rounded-3xl overflow-hidden shadow-lg hover:scale-105 transition-transform duration-300">
                 <Image 
                     src={getImg(6)} 
                     alt="Gallery image 7" 
@@ -104,7 +105,20 @@ const RecentGallery: React.FC<RecentGalleryProps> = ({ images }) => {
                 />
             </div>
         </div>
+      </div>
 
+      {/* Mobile View - Horizontal Scroll */}
+      <div className="lg:hidden flex gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide snap-x">
+          {displayImages.map((img, idx) => (
+              <div key={idx} className="relative flex-shrink-0 w-[280px] h-[350px] rounded-3xl overflow-hidden shadow-lg snap-center">
+                  <Image 
+                      src={img} 
+                      alt={`Gallery image ${idx + 1}`} 
+                      fill 
+                      className="object-cover"
+                  />
+              </div>
+          ))}
       </div>
     </section>
   );

@@ -64,7 +64,7 @@ const CalendarWidget: React.FC<CalendarWidgetProps> = ({
 
 
   return (
-    <div className="bg-[#E8E8E8] rounded-2xl p-6 mt-28">
+    <div className="bg-[#E8E8E8] rounded-2xl p-6 md:mt-28">
       {/* Price */}
       <div className="mb-6">
         <span className="text-gray-600">From </span>
