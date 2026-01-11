@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { TourPackage } from "../types";
+import Link from "next/link";
 
 interface PackageCardProps {
   data: TourPackage;
@@ -9,7 +10,7 @@ interface PackageCardProps {
 
 const TourPackageCard: React.FC<PackageCardProps> = ({ data, isHighlighted = false }) => {
   return (
-    <div className={`group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-xl p-2    'hover:bg-white'}`}>
+    <Link href={`/tour-details/${data.slug}`} className={`group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-xl p-2    'hover:bg-white'}`}>
       {/* Image Container */}
       <div className="relative h-44 w-full overflow-hidden rounded-lg">
         <Image
@@ -48,7 +49,7 @@ const TourPackageCard: React.FC<PackageCardProps> = ({ data, isHighlighted = fal
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

@@ -167,6 +167,8 @@ export async function POST(request: Request) {
             console.log('DEBUG: Parsed Tour Options:', JSON.stringify(tourOptions, null, 2));
             tourOptions.forEach((opt: any, idx: number) => {
                 console.log(`DEBUG: Option ${idx} Extra Services:`, opt.extraServices);
+                console.log(`DEBUG: Option ${idx} Time Slots:`, opt.timeSlots);
+                console.log(`DEBUG: Option ${idx} Duration Type:`, opt.tourDurationType);
             });
         }
     } catch (e) {

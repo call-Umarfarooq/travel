@@ -21,12 +21,10 @@ export default function Home() {
       <EuropeToursSection />
       <TrendingPackagesSection />
       <CTASection />
-
       <CurrentPackagesSection />
       <FavouriteBooking />
       <ViewPackagesSection />
       <PromotionSection />
-
       <Footer />
     </main>
   );

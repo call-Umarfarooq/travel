@@ -9,7 +9,7 @@ const EuropeToursSection: React.FC = () => {
   ];
 
   return (
-    <section className="md:py-20 py-8 bg-white overflow-hidden">
+    <section className="md:pb-16 py-8 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-6 items-start">
           {/* Left Content */}

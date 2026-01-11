@@ -21,7 +21,7 @@ const CurrentPackagesSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 lg:py-20 bg-white">
+    <section className="py-8 lg:pb-8 bg-white">
       <div className="container-custom">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left - Image */}

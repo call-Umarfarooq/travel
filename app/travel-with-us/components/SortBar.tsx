@@ -1,26 +1,20 @@
 'use client';
 
-import React, { useState } from "react";
+import React from "react";
 
-type SortOption = 'date' | 'price-low' | 'price-high' | 'name';
+export type SortOption = 'date' | 'price-low' | 'price-high' | 'name';
 
 interface SortBarProps {
-  onSortChange?: (sort: SortOption) => void;
+  activeSort: SortOption;
+  onSortChange: (sort: SortOption) => void;
 }
 
-const SortBar: React.FC<SortBarProps> = ({ onSortChange }) => {
-  const [activeSort, setActiveSort] = useState<SortOption>('date');
-
-  const handleSort = (sort: SortOption) => {
-    setActiveSort(sort);
-    onSortChange?.(sort);
-  };
-
+const SortBar: React.FC<SortBarProps> = ({ activeSort, onSortChange }) => {
   return (
     <div className="bg-[#F8F8F8]  py-5 px-8 flex flex-wrap justify-center items-center gap-8 lg:gap-16">
       {/* Date */}
       <button
-        onClick={() => handleSort('date')}
+        onClick={() => onSortChange('date')}
         className={`flex items-center gap-2 text-sm transition-colors ${
           activeSort === 'date' ? 'text-[#F85E46]' : 'text-gray-600 hover:text-[#F85E46]'
         }`}
@@ -33,7 +27,7 @@ const SortBar: React.FC<SortBarProps> = ({ onSortChange }) => {
 
       {/* Price Low To High */}
       <button
-        onClick={() => handleSort('price-low')}
+        onClick={() => onSortChange('price-low')}
         className={`flex items-center gap-2 text-sm transition-colors ${
           activeSort === 'price-low' ? 'text-[#F85E46]' : 'text-gray-600 hover:text-[#F85E46]'
         }`}
@@ -46,7 +40,7 @@ const SortBar: React.FC<SortBarProps> = ({ onSortChange }) => {
 
       {/* Price High To Low */}
       <button
-        onClick={() => handleSort('price-high')}
+        onClick={() => onSortChange('price-high')}
         className={`flex items-center gap-2 text-sm transition-colors ${
           activeSort === 'price-high' ? 'text-[#F85E46]' : 'text-gray-600 hover:text-[#F85E46]'
         }`}
@@ -59,7 +53,7 @@ const SortBar: React.FC<SortBarProps> = ({ onSortChange }) => {
 
       {/* Name (A-Z) */}
       <button
-        onClick={() => handleSort('name')}
+        onClick={() => onSortChange('name')}
         className={`flex items-center gap-2 text-sm transition-colors ${
           activeSort === 'name' ? 'text-[#F85E46]' : 'text-gray-600 hover:text-[#F85E46]'
         }`}

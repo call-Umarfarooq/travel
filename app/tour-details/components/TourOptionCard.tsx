@@ -9,6 +9,8 @@ interface TourOptionCardProps {
   features: { icon: string; label: string }[];
   penalty: string;
   time: string;
+  timeSlots?: string[];
+  tourDurationType?: 'hours' | 'days'; // New
   
   // Pricing & Configuration
   pricingType?: 'person' | 'group';
@@ -30,6 +32,7 @@ interface TourOptionCardProps {
     infants?: number;
     guests?: number;
     items?: number;
+    timeSlot?: string; // New
     totalPrice: string;
   }) => void;
 }
@@ -41,6 +44,8 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   features,
   penalty,
   time,
+  timeSlots = [], // New
+  tourDurationType = 'hours', // New prop with default
   pricingType = 'person',
   adultPrice,
   childPrice,
@@ -56,6 +61,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   onBookNow,
 }) => {
   const [expanded, setExpanded] = useState(isExpanded);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null); // New
   
   // Person Mode State
   const [adults, setAdults] = useState(1);
@@ -129,6 +135,40 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
     return (baseTotal + extrasTotal).toFixed(2);
   };
 
+  // Helper to Validate
+  const isValid = () => {
+      if (!selectedDate) return { valid: false, msg: 'Please select a date first' };
+      
+      // If duration type is HOURS, we enforce time slots if they exist
+      if (tourDurationType === 'hours') {
+           if (timeSlots && timeSlots.length > 0 && !selectedTimeSlot) {
+               return { valid: false, msg: 'Please select a time slot.' };
+           }
+      }
+      
+      return { valid: true };
+  };
+
+  const handleBooking = (action: 'add_to_cart' | 'book_now') => {
+      const validation = isValid();
+      if (!validation.valid) {
+          alert(validation.msg);
+          return;
+      }
+
+      const details = { 
+        adults: pricingType === 'person' ? adults : 0, 
+        children: pricingType === 'person' ? children : 0, 
+        infants: pricingType === 'person' ? infants : 0,
+        guests: pricingType === 'group' ? guests : 0,
+        items: pricingType === 'group' ? items : 0,
+        // For 'days', we might fallback to generic time or just empty/null effectively
+        timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : time,
+        totalPrice: calculateTotal() 
+      };
+      if(onBookNow) onBookNow({...details, action: action} as any);
+  };
+  
   return (
     <div className={`rounded-2xl overflow-hidden transition-all mb-4 border-2 ${expanded ? 'border-[#F85E46] bg-[#FFF8F6]' : 'border-gray-200 bg-white'}`}>
       {/* Card Content */}
@@ -202,12 +242,39 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
               </div>
             )}
 
-            {/* Time */}
-            <div className="mb-6">
-               <span className="px-6 py-2 bg-[#F85E46] text-white text-sm font-medium rounded-full">
-                 {time}
-               </span>
-            </div>
+             {/* Conditional Time Slot Render */}
+             {/* Only show time slots if duration type is 'hours' */}
+             {tourDurationType === 'hours' && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-5 h-5 text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-base md:text-[20px] text-[#000000]">
+                        {timeSlots && timeSlots.length > 0 ? ':' : ': ' + time}
+                      </span>
+                  </div>
+                  
+                  {/* Time Slots Grid */}
+                  {timeSlots && timeSlots.length > 0 && (
+                    <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
+                      {timeSlots.map((slot, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedTimeSlot(slot)}
+                          className={`px-4 py-2 rounded-lg text-sm md:text-[18px] font-medium transition-colors border
+                            ${selectedTimeSlot === slot 
+                              ? 'bg-[#F85E46] text-white border-[#F85E46]' 
+                              : 'bg-[#E8E8E8] text-[#000000] border-transparent hover:bg-gray-300'
+                            }`}
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+             )}
 
     
 
@@ -351,53 +418,54 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
       </div>
 
       {/* Footer - Only when expanded */}
-      {expanded && (
-        <div className="bg-[#E8E8E8] px-4 py-3 md:px-6 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left">
-            <p className="text-lg md:text-[24px] text-[#000000]">Total Price</p>
-            <p className="text-[#181E4B] font-bold text-xl md:text-[24px]">{calculateTotal()} {currency}</p>
-          </div>
-          
-          <div className="flex gap-3">
-            <button 
-              onClick={() => {
-                 if (!selectedDate) { alert('Please select a date first'); return; }
-                 const details = { 
-                  adults: pricingType === 'person' ? adults : 0, 
-                  children: pricingType === 'person' ? children : 0, 
-                  infants: pricingType === 'person' ? infants : 0,
-                  guests: pricingType === 'group' ? guests : 0,
-                  items: pricingType === 'group' ? items : 0,
-                  totalPrice: calculateTotal() 
-                 };
-                 if(onBookNow) onBookNow({...details, action: 'add_to_cart'} as any);
-              }}
-              className="px-4 py-2 md:px-6 md:py-3 bg-white border border-gray-300 text-[#000000] text-lg md:text-[24px] font-medium rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
-            >
-              Add To Cart
-            </button>
-            <button 
-              onClick={() => {
-                if (!selectedDate) { alert('Please select a date first'); return; }
-                const details = { 
-                  adults: pricingType === 'person' ? adults : 0, 
-                  children: pricingType === 'person' ? children : 0, 
-                  infants: pricingType === 'person' ? infants : 0,
-                  guests: pricingType === 'group' ? guests : 0,
-                  items: pricingType === 'group' ? items : 0,
-                  totalPrice: calculateTotal() 
-                };
-                if(onBookNow) onBookNow({...details, action: 'book_now'} as any);
-              }}
-              className="px-5 py-2 md:px-8 md:py-3 bg-[#F85E46] text-white text-lg md:text-[24px] font-medium rounded-lg hover:bg-[#e54d36] transition-colors whitespace-nowrap"
-            >
-              Book Now
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Footer - Only when expanded */}
+        {expanded && (() => {
+           // Helper logic for button state
+           const isTimeSelectionRequired = tourDurationType === 'hours' && timeSlots && timeSlots.length > 0;
+           const isBookable = !isTimeSelectionRequired || !!selectedTimeSlot;
+
+           // Dynamic Classes
+           const addToCartClass = `px-4 py-2 md:px-6 md:py-3 border text-lg md:text-[24px] font-medium rounded-lg transition-colors whitespace-nowrap ${
+             !isBookable
+               ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+               : 'bg-white border-gray-300 text-[#000000] hover:bg-gray-50'
+           }`;
+
+           const bookNowClass = `px-5 py-2 md:px-8 md:py-3 text-lg md:text-[24px] font-medium rounded-lg transition-colors whitespace-nowrap ${
+             !isBookable
+               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+               : 'bg-[#F85E46] text-white hover:bg-[#e54d36]'
+           }`;
+
+           return (
+            <div className="bg-[#E8E8E8] px-4 py-3 md:px-6 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <p className="text-lg md:text-[24px] text-[#000000]">Total Price</p>
+                <p className="text-[#181E4B] font-bold text-xl md:text-[24px]">{calculateTotal()} {currency}</p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => handleBooking('add_to_cart')}
+                  disabled={!isBookable}
+                  className={addToCartClass}
+                >
+                  Add To Cart
+                </button>
+                <button 
+                  onClick={() => handleBooking('book_now')}
+                  disabled={!isBookable}
+                  className={bookNowClass}
+                >
+                  Book Now
+                </button>
+              </div>
+            </div>
+           );
+        })()}
     </div>
   );
 };
 
 export default TourOptionCard;
+

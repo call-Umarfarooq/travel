@@ -94,6 +94,8 @@ function CreatePackageContent() {
       title: 'Standard Tour',
       duration: '4 Hours',
       time: '14:00',
+      tourDurationType: 'hours', // New
+      timeSlots: [] as string[], 
       description: '',
       pricingType: 'person', // person or group
       minPax: 1,
@@ -111,7 +113,7 @@ function CreatePackageContent() {
         { icon: '🗣️', label: 'Live Guide' }
       ],
       inclusions: [],
-      extraServices: [] as { name: string; price: string }[]
+      extraServices: [] as { name: string; price: string }[],
     }
   ]);
 
@@ -248,6 +250,8 @@ function CreatePackageContent() {
       title: 'New Option',
       duration: '4 Hours',
       time: '10:00',
+      tourDurationType: 'hours', // New
+      timeSlots: [] as string[],
       description: '',
       pricingType: 'person',
       minPax: 1,
@@ -265,7 +269,7 @@ function CreatePackageContent() {
         { icon: '🗣️', label: 'Live Guide' }
       ],
       inclusions: [],
-      extraServices: [] as { name: string; price: string }[]
+      extraServices: [] as { name: string; price: string }[],
     }]);
   };
   const removeTourOption = (index: number) => {
@@ -289,6 +293,30 @@ function CreatePackageContent() {
     const newOptions = [...tourOptions];
     (newOptions[optionIndex].extraServices[serviceIndex] as any)[field] = value;
     setTourOptions(newOptions);
+  };
+
+  // Time Slot Handlers
+  const addTimeSlot = (optionIndex: number) => {
+    const newOptions = [...tourOptions];
+    if (!newOptions[optionIndex].timeSlots) newOptions[optionIndex].timeSlots = [];
+    newOptions[optionIndex].timeSlots.push('09:00'); // Default time
+    setTourOptions(newOptions);
+  };
+
+  const removeTimeSlot = (optionIndex: number, slotIndex: number) => {
+    const newOptions = [...tourOptions];
+    if (newOptions[optionIndex].timeSlots) {
+       newOptions[optionIndex].timeSlots = newOptions[optionIndex].timeSlots.filter((_, i) => i !== slotIndex);
+       setTourOptions(newOptions);
+    }
+  };
+
+  const handleTimeSlotChange = (optionIndex: number, slotIndex: number, value: string) => {
+    const newOptions = [...tourOptions];
+     if (newOptions[optionIndex].timeSlots) {
+        newOptions[optionIndex].timeSlots[slotIndex] = value;
+        setTourOptions(newOptions);
+     }
   };
 
   // Image Handlers
@@ -379,6 +407,7 @@ function CreatePackageContent() {
       // Clean Options
       const cleanedOptions = tourOptions.map(opt => ({
           ...opt,
+          timeSlots: opt.timeSlots || [],
           adultPrice: Number(opt.adultPrice) || 0,
           childPrice: Number(opt.childPrice) || 0,
           infantPrice: Number(opt.infantPrice) || 0,
@@ -606,10 +635,79 @@ function CreatePackageContent() {
                                    <label className="block text-xs text-gray-500 mb-1">Option Name</label>
                                    <input type="text" value={option.title} onChange={(e) => handleTourOptionChange(idx, 'title', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
                                </div>
-                               <div>
-                                   <label className="block text-xs text-gray-500 mb-1">Time</label>
-                                   <input type="time" value={option.time} onChange={(e) => handleTourOptionChange(idx, 'time', e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                               
+                               <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-2 mb-2 bg-gray-50 p-3 rounded-lg">
+                                  <div>
+                                      <label className="block text-xs text-gray-500 mb-2 font-bold">Duration Type</label>
+                                      <div className="flex gap-4">
+                                          <label className="flex items-center gap-2 cursor-pointer">
+                                              <input 
+                                                type="radio" 
+                                                name={`durationType-${idx}`}
+                                                value="hours"
+                                                checked={option.tourDurationType !== 'days'} // Default to hours
+                                                onChange={() => handleTourOptionChange(idx, 'tourDurationType', 'hours')}
+                                                className="text-blue-600"
+                                              />
+                                              <span className="text-sm">Hours (Time Slots)</span>
+                                          </label>
+                                          <label className="flex items-center gap-2 cursor-pointer">
+                                              <input 
+                                                type="radio" 
+                                                name={`durationType-${idx}`}
+                                                value="days"
+                                                checked={option.tourDurationType === 'days'}
+                                                onChange={() => handleTourOptionChange(idx, 'tourDurationType', 'days')}
+                                                className="text-blue-600"
+                                              />
+                                              <span className="text-sm">Days (No Time Selection)</span>
+                                          </label>
+                                      </div>
+                                  </div>
+
+                                  {/* Conditional Time Logic */}
+                                  <div>
+                                      {option.tourDurationType === 'days' ? (
+                                           <div className="flex items-center h-full">
+                                              <p className="text-sm text-gray-500 italic">No start time required for day tours.</p>
+                                           </div>
+                                      ) : (
+                                          <div>
+                                              <label className="block text-xs text-gray-500 mb-1">Default Time (Hidden if using slots)</label>
+                                              <input type="time" value={option.time} onChange={(e) => handleTourOptionChange(idx, 'time', e.target.value)} className="w-full px-3 py-2 border rounded-lg mb-2" />
+                                              
+                                              <label className="block text-xs text-gray-500 mb-1 font-bold">Start Time Slots (User Selects One)</label>
+                                              <div className="space-y-2 border p-2 rounded bg-white">
+                                                  {option.timeSlots && option.timeSlots.map((slot, sIdx) => (
+                                                      <div key={sIdx} className="flex gap-1">
+                                                          <input 
+                                                              type="time" 
+                                                              value={slot} 
+                                                              onChange={(e) => handleTimeSlotChange(idx, sIdx, e.target.value)}
+                                                              className="w-full px-2 py-1 border rounded text-sm"
+                                                          />
+                                                          <button 
+                                                              type="button" 
+                                                              onClick={() => removeTimeSlot(idx, sIdx)}
+                                                              className="text-red-500 hover:text-red-700 px-1"
+                                                          >
+                                                              ✕
+                                                          </button>
+                                                      </div>
+                                                  ))}
+                                                  <button 
+                                                      type="button" 
+                                                      onClick={() => addTimeSlot(idx)}
+                                                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                                  >
+                                                      + Add Time Slot
+                                                  </button>
+                                              </div>
+                                          </div>
+                                      )}
+                                  </div>
                                </div>
+
                                <div>
                                    <label className="block text-xs text-gray-500 mb-1">Pricing Type</label>
                                    <select value={option.pricingType} onChange={(e) => handleTourOptionChange(idx, 'pricingType', e.target.value)} className="w-full px-3 py-2 border rounded-lg">

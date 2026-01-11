@@ -35,7 +35,7 @@ const FavouriteBooking = () => {
   ];
 
   return (
-    <section className="py-16 lg:py-20 bg-white overflow-hidden">
+    <section className="py-8 lg:pb-16 bg-white overflow-hidden">
       <div className="container-custom">
         <div className="flex flex-col lg:flex-row items-center">
           {/* Left - Content */}

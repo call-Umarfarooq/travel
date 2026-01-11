@@ -43,7 +43,7 @@ const TrendingPackagesSection: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-white">
+    <section className="pb-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -77,20 +77,20 @@ const TrendingPackagesSection: React.FC = () => {
           >
             {packages.length > 0 ? (
                 packages.map((pkg, index) => (
-                <div key={pkg._id || index} className="flex-shrink-0 w-72">
+                    <div key={pkg._id || index} className="flex-shrink-0 w-72 h-full"> 
                     <PackageCard 
                         image={pkg.image}
                         title={pkg.title}
                         location={pkg.location}
                         duration={pkg.duration}
-                        hours={'24 hours'} // Default or derive from duration if format differs
+                        hours={pkg.tourOptions?.[0]?.duration || 'N/A'} 
                         peopleGoing={pkg.peopleGoing}
                         price={`${pkg.price} AED`}
                         rating={pkg.rating}
                         description={pkg.description}
                         slug={pkg.slug}
                     />
-                </div>
+                    </div>
                 ))
             ) : (
                 <p className="text-center w-full text-gray-500">Loading packages...</p>

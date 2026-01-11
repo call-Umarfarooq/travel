@@ -8,6 +8,7 @@ export interface TourPackage {
   rating: number;
   date: string;
   reviews: number;
+  slug: string;
 }
 
 export const packagesData: TourPackage[] = [
@@ -20,6 +21,7 @@ export const packagesData: TourPackage[] = [
     rating: 5.0,
     date: "11 September 2022",
     reviews: 584,
+    slug: "switzerland-tour",
   },
   {
     id: 2,
@@ -30,6 +32,7 @@ export const packagesData: TourPackage[] = [
     rating: 4.9,
     date: "12 September 2022",
     reviews: 584,
+    slug: "berlin-adventure",
   },
   {
     id: 3,
@@ -40,6 +43,7 @@ export const packagesData: TourPackage[] = [
     rating: 5.0,
     date: "14 September 2022",
     reviews: 584,
+    slug: "maldives-honeymoon",
   },
   {
     id: 4,
@@ -50,6 +54,7 @@ export const packagesData: TourPackage[] = [
     rating: 4.8,
     date: "15 September 2022",
     reviews: 584,
+    slug: "toronto-city-break",
   },
   {
     id: 5,
@@ -60,6 +65,7 @@ export const packagesData: TourPackage[] = [
     rating: 5.0,
     date: "16 September 2022",
     reviews: 584,
+    slug: "baku-cultural-tour",
   },
   {
     id: 6,
@@ -70,5 +76,6 @@ export const packagesData: TourPackage[] = [
     rating: 4.0,
     date: "18 September 2022",
     reviews: 584,
+    slug: "china-great-wall",
   },
 ];

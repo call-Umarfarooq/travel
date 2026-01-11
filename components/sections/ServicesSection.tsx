@@ -44,7 +44,7 @@ const ServicesSection: React.FC = () => {
   ];
 
   return (
-    <section className="section-padding bg-white">
+    <section className="py-8  bg-white">
       <div className="container-custom">
         <SectionTitle
           subtitle="CATEGORY"

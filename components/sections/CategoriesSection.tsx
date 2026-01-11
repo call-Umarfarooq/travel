@@ -154,10 +154,10 @@ const CategoriesSection: React.FC = () => {
   }
 
   return (
-    <section className="md:py-16 py-8 bg-white overflow-hidden">
+    <section className="md:pb-16 py-8 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-2">
         {/* Section Title */}
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark text-center mb-16">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark text-center mb-12">
           Tour Categories
         </h2>
 

@@ -361,7 +361,7 @@ export default function CityTourPage() {
             <section className="mt-8">
               <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Highlights</h3>
               <div 
-                className="text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside"
+                className="text-base md:text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside break-words"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.highlights) }}
               />
             </section>
@@ -373,7 +373,7 @@ export default function CityTourPage() {
             <section className="mt-8">
               <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Includes</h3>
               <div 
-                className="text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside"
+                className="text-base md:text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside break-words"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.includes) }}
               />
             </section>
@@ -384,7 +384,7 @@ export default function CityTourPage() {
               {/* Details Section */}
               <section className="mt-8 mb-8">
                 <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Details</h3>
-                <p className="text-[20px] text-[#000000] leading-relaxed">
+                <p className="text-base md:text-[20px] text-[#000000] leading-relaxed break-words">
                    {activeData.description}
                 </p>
               </section>

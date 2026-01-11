@@ -26,6 +26,8 @@ export interface IPackage extends Document {
     duration: string;
     time: string;
     description?: string;
+    tourDurationType?: 'hours' | 'days'; // New field
+    timeSlots?: string[]; 
     
     pricingType?: 'person' | 'group';
     minPax?: number;
@@ -62,7 +64,9 @@ export interface IPackage extends Document {
 const TourOptionSchema = new mongoose.Schema({
   title: String,
   duration: String,
+  tourDurationType: { type: String, enum: ['hours', 'days'], default: 'hours' }, // New
   time: String,
+  timeSlots: [String], // New
   description: String,
   
   // Pricing

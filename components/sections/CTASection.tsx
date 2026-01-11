@@ -2,7 +2,7 @@ import React from 'react';
 
 const CTASection: React.FC = () => {
   return (
-    <section className="relative py-16  overflow-hidden">
+    <section className="relative pb-16  overflow-hidden">
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"

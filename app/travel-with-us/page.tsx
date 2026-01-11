@@ -6,7 +6,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import TourPackageCard from "./components/TourPackageCard";
 import TripSidebar from "./components/TripSidebar";
-import SortBar from "./components/SortBar";
+import SortBar, { SortOption } from "./components/SortBar";
 import Pagination from "./components/Pagination";
 
 function TravelContent() {
@@ -14,6 +14,7 @@ function TravelContent() {
   const categoryId = searchParams.get('category');
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState<SortOption>('date');
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -31,7 +32,8 @@ function TravelContent() {
             city: pkg.title, // Mapping title to city
             description: pkg.description,
             price: pkg.price,
-            rating: pkg.rating
+            rating: pkg.rating,
+            slug: pkg.slug,
           })));
         }
       } catch (error) {
@@ -70,7 +72,7 @@ function TravelContent() {
 
       {/* Sort Bar - Overlapping Hero */}
       <div className="max-w-5xl mx-auto px-4 -mt-5  relative z-20">
-        <SortBar />
+        <SortBar activeSort={sortOption} onSortChange={setSortOption} />
       </div>
 
       {/* Main Content - White Card Container */}
@@ -84,7 +86,19 @@ function TravelContent() {
               ) : packages.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {packages.map((pkg, index) => (
+                        {[...packages].sort((a, b) => {
+                          if (sortOption === 'price-low') {
+                            return a.price - b.price;
+                          } else if (sortOption === 'price-high') {
+                            return b.price - a.price;
+                          } else if (sortOption === 'name') {
+                            return a.city.localeCompare(b.city);
+                          } else {
+                            // Default to date (assuming fetched in order, or use a date field if available)
+                            // Since API returns createdAt:-1, they are already sorted by date desc
+                            return 0; 
+                          }
+                        }).map((pkg, index) => (
                         <TourPackageCard 
                             key={pkg.id} 
                             data={pkg} 
