@@ -57,7 +57,7 @@ export default function ManageContentPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-[#181E4B]">Manage Content</h1>
         <div className="flex gap-4">
-             <Link href="/dashboard/packages/create" className="bg-[#F85E46] text-white px-4 py-2 rounded-lg hover:bg-[#e54d36] transition">
+             <Link href="/dashboard/create" className="bg-[#F85E46] text-white px-4 py-2 rounded-lg hover:bg-[#e54d36] transition">
                 + New Package
              </Link>
              <Link href="/dashboard/categories/create" className="bg-[#181E4B] text-white px-4 py-2 rounded-lg hover:bg-[#12163a] transition">
@@ -111,7 +111,7 @@ export default function ManageContentPage() {
                       <td className="px-6 py-4 text-gray-600 font-medium">{pkg.price} AED</td>
                       <td className="px-6 py-4 text-right space-x-2">
                         <Link 
-                           href={`/dashboard/packages/create?id=${pkg._id}`}
+                           href={`/dashboard/create?id=${pkg._id}`}
                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                         >
                           Edit

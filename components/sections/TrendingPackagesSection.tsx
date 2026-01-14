@@ -47,9 +47,9 @@ const TrendingPackagesSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <span className="text-primary font-semibold text-sm uppercase tracking-wider mb-4 block">
+          {/* <span className="text-primary font-semibold text-sm uppercase tracking-wider mb-4 block">
             TRENDY
-          </span>
+          </span> */}
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark leading-tight">
             Our Trending Tour
             <br />

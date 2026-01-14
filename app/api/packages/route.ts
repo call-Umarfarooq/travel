@@ -15,8 +15,23 @@ export async function GET(request: Request) {
     const slug = searchParams.get('slug');
     const id = searchParams.get('id');
 
-    let query = {};
-    if (categoryId) query = { ...query, category: categoryId };
+    let query: any = {};
+    if (categoryId) {
+        // Check if categoryId is a valid ObjectId, otherwise treat as slug
+        if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+            query.category = categoryId;
+        } else {
+             // It's a slug, find category first
+             const categoryDoc = await Category.findOne({ slug: categoryId });
+             if (categoryDoc) {
+                 query.category = categoryDoc._id;
+             } else {
+                 // Slug not found, maybe return empty or ignore? 
+                 // If provided slug is invalid, we should probably return nothing
+                 query.category = null; // forcing empty result
+             }
+        }
+    }
     if (slug) query = { ...query, slug: slug };
     if (id) query = { ...query, _id: id };
 

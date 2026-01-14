@@ -10,8 +10,8 @@ const FavouriteBooking = () => {
           <path d="M7 8H17M7 12H17M7 16H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
       ),
-      title: 'Choose Destination',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Urna, tortor tempus.',
+      title: 'Corporate Inquiries',
+      description: 'Tailor-made desert safaris and tours for companies, team outings, conferences, and incentive travel, handled by experienced professionals.',
     },
     {
       icon: (
@@ -20,8 +20,8 @@ const FavouriteBooking = () => {
           <path d="M3 9H21M8 2V5M16 2V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
         </svg>
       ),
-      title: 'Check Availability',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Urna, tortor tempus.',
+      title: 'Group Events & Celebrations',
+      description: 'From large group bookings to private events, we organize seamless experiences for birthdays, anniversaries, family gatherings, and special occasions.',
     },
     {
       icon: (
@@ -29,8 +29,8 @@ const FavouriteBooking = () => {
           <path d="M3 21H21M5 21V11L12 4L19 11V21M9 21V15H15V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
-      title: "Let's Go",
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Urna, tortor tempus.',
+      title: "End-to-End Event Management",
+      description: 'Transportation, activities, private camps, dining, entertainment, branding, and custom requirements — all managed under one roof.',
     },
   ];
 
@@ -43,10 +43,11 @@ const FavouriteBooking = () => {
             <span className="text-[#F85E46] font-medium text-sm mb-2 block">
               Fast & Easy
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight mb-8">
-              Get Your Favourite<br />
-              Resort Bookings
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight mb-3">
+              Corporate & Group Experiences Made Easy
             </h2>
+            <p className='text-gray-600 text-lg mb-8'>Plan unforgettable moments in the desert — professionally managed from start to finish.
+</p>
 
             <div className="space-y-6">
               {features.map((feature, index) => (

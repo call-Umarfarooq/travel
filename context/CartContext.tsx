@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
   id: string; // Unique ID (timestamp + random)
+  packageId: string; // MongoDB ID of the package
   title: string;
   slug: string;
   image?: string;

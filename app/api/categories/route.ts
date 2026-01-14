@@ -10,9 +10,17 @@ export async function GET(request: Request) {
     await connectToDatabase();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const slug = searchParams.get('slug'); // New: support query by slug
 
+    // Prioritize ID if present, else check slug
     if (id) {
         const category = await Category.findById(id);
+        if (!category) return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 });
+        return NextResponse.json({ success: true, data: category });
+    }
+    
+    if (slug) {
+        const category = await Category.findOne({ slug });
         if (!category) return NextResponse.json({ success: false, error: 'Category not found' }, { status: 404 });
         return NextResponse.json({ success: true, data: category });
     }
@@ -98,8 +106,11 @@ export async function POST(request: Request) {
 
     const imageUrl = `/uploads/${filename}`;
 
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
     const category = await Category.create({
       name,
+      slug,
       description,
       image: imageUrl,
     });

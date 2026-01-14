@@ -104,6 +104,7 @@ export default function CityTourPage() {
   const handleBookNow = (option: any, guestDetails: any) => {
     const itemToAdd = {
       title: activeData.title,
+      packageId: activeData._id || '000000000000000000000000', // valid length hex if missing strictly needed, or handle in API
       slug: slug || 'custom-package',
       image: activeData.image,
       optionTitle: option.title,

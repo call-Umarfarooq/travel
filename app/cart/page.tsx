@@ -6,19 +6,100 @@ import Footer from '@/components/layout/Footer';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import Link from 'next/link';
+import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '@/components/checkout/CheckoutForm';
+import { useRouter } from 'next/navigation';
+import { countryCodes } from '@/lib/countryCodes';
+
+// Make sure to add your public key to .env.local
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 export default function CartPage() {
-  const { items, removeFromCart, cartTotal } = useCart();
+  const { items, removeFromCart, cartTotal, clearCart } = useCart();
+  const router = useRouter();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const [buyerInfo, setBuyerInfo] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    countryCode: 'AED',
+    countryCode: '+971', // Default to UAE
   });
 
   const handleBuyerChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setBuyerInfo({ ...buyerInfo, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckout = async () => {
+    // Basic validation
+    if (!buyerInfo.email) {
+       setError("Please enter your email address.");
+       return;
+    }
+    setError(null);
+
+    // Create Payment Intent
+    try {
+        const res = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, amount: cartTotal }),
+        });
+        const data = await res.json();
+        if (data.clientSecret) {
+            setClientSecret(data.clientSecret);
+        } else {
+            setError("Failed to initialize payment. Please try again.");
+        }
+    } catch (err) {
+        console.error(err);
+        setError("Network error. Please try again.");
+    }
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+      // Save order to database
+      try {
+          const res = await fetch('/api/bookings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  items,
+                  buyerInfo,
+                  paymentIntentId,
+                  totalAmount: cartTotal
+              })
+          });
+          const json = await res.json();
+          if (json.success) {
+              clearCart();
+              router.push('/booking/success');
+          } else {
+              setError("Payment successful but failed to save booking. Please contact support.");
+          }
+      } catch (err) {
+          console.error(err);
+          setError("Order saving failed.");
+      }
+  };
+
+  const appearance = {
+    theme: 'stripe' as const,
+  };
+  
+  const options: any = {
+    clientSecret: clientSecret || '',
+    appearance,
+    defaultValues: {
+      billingDetails: {
+        name: `${buyerInfo.firstName} ${buyerInfo.lastName}`.trim(),
+        email: buyerInfo.email,
+        phone: `${buyerInfo.countryCode}${buyerInfo.phone}`,
+      }
+    }
   };
 
   return (
@@ -61,17 +142,19 @@ export default function CartPage() {
 
                     <div className="mb-4">
                         <label className="block text-xs font-semibold text-gray-500 mb-1">Email <span className="text-red-500">*</span></label>
-                         <input type="email" name="email" value={buyerInfo.email} onChange={handleBuyerChange} className={`w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46] ${!buyerInfo.email ? 'border border-red-300' : ''}`} />
-                         {!buyerInfo.email && <p className="text-red-500 text-xs mt-1">Required Field</p>}
+                         <input type="email" name="email" value={buyerInfo.email} onChange={handleBuyerChange} className={`w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46] ${!buyerInfo.email && error ? 'border border-red-300' : ''}`} />
+                         {!buyerInfo.email && error && <p className="text-red-500 text-xs mt-1">Required Field</p>}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                              <label className="block text-xs font-semibold text-gray-500 mb-1">Country Code</label>
                              <select name="countryCode" value={buyerInfo.countryCode} onChange={handleBuyerChange} className="w-full bg-gray-200 border-none rounded-md px-4 py-3">
-                                <option value="AED">+971 (UAE)</option>
-                                <option value="US">+1 (USA)</option>
-                                <option value="UK">+44 (UK)</option>
+                                {countryCodes.map((c) => (
+                                    <option key={`${c.code}-${c.country}`} value={c.code}>
+                                        {c.code} ({c.country})
+                                    </option>
+                                ))}
                              </select>
                         </div>
                         <div className="md:col-span-2">
@@ -102,7 +185,7 @@ export default function CartPage() {
                                     
                                     <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
                                         <div className="flex items-center gap-1">
-                                           <span>📅</span> {item.date.toLocaleDateString()}
+                                           <span>📅</span> {new Date(item.date).toLocaleDateString()}
                                         </div>
                                         <div className="flex items-center gap-1">
                                            <span>⏰</span> {item.time}
@@ -110,8 +193,8 @@ export default function CartPage() {
                                         <div className="flex items-center gap-1">
                                            <span>👥</span> 
                                            {item.pricingType === 'group' 
-                                              ? `${item.items} Items, ${item.guests} Guests`
-                                              : `${item.adults + item.children + item.infants} Guests`
+                                              ? `${item.items || 1} Items`
+                                              : `${(item.adults || 0) + (item.children || 0) + (item.infants || 0)} Guests`
                                            }
                                         </div>
                                     </div>
@@ -122,18 +205,6 @@ export default function CartPage() {
                                     </div>
                                 </div>
                             </div>
-                            
-                            {/* Pick-up Point */}
-                            <div className="mt-6 pt-6 border-t border-gray-100">
-                                <h4 className="font-bold text-gray-800 mb-1 flex items-center gap-2">
-                                    <span className="text-[#F85E46]">📍</span> Pick-up point
-                                </h4>
-                                <p className="text-xs text-gray-500 mb-2">Make a note of the address where you will pick-up and drop-off.</p>
-                                <textarea 
-                                    placeholder="Write your pick-up and drop-off address" 
-                                    className="w-full bg-gray-200 border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#F85E46] min-h-[80px]"
-                                />
-                            </div>
                         </div>
                     ))}
                 </div>
@@ -142,7 +213,7 @@ export default function CartPage() {
               {/* Right Column (Sticky Summary) */}
               <div className="w-full lg:w-[350px]">
                   <div className="bg-[#D9D3CC] rounded-xl p-6 sticky top-24">
-                      <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b border-gray-400/30">Order Summary ({items.length} Items)</h3>
+                      <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b border-gray-400/30">Order Summary</h3>
                       
                       <div className="space-y-3 mb-6">
                           {items.map((item, idx) => (
@@ -151,13 +222,6 @@ export default function CartPage() {
                                   <span className="font-bold text-gray-900">{item.totalPrice.toLocaleString()} AED</span>
                               </div>
                           ))}
-                      </div>
-
-                      {/* Promo Code */}
-                      <div className="mb-6">
-                          <button className="text-[#F85E46] font-bold text-sm flex items-center gap-1 hover:underline">
-                              <span>🎟️</span> Have a promo code ?
-                          </button>
                       </div>
 
                       <div className="border-t border-gray-400/30 pt-4 mb-4">
@@ -171,16 +235,27 @@ export default function CartPage() {
                           </div>
                       </div>
 
-                      <div className="flex gap-2 mb-6">
-                           {/* Payment Icons Placeholder */}
-                           <div className="h-6 w-10 bg-white rounded shadow-sm flex items-center justify-center text-[10px] font-bold text-blue-600">VISA</div>
-                           <div className="h-6 w-10 bg-white rounded shadow-sm flex items-center justify-center text-[10px] font-bold text-red-500">MC</div>
-                           <div className="h-6 w-10 bg-white rounded shadow-sm flex items-center justify-center text-[10px] font-bold text-blue-400">PayPal</div>
-                      </div>
+                      {/* Payment Section */}
+                      {clientSecret ? (
+                         <Elements options={options} stripe={stripePromise}>
+                             <CheckoutForm amount={cartTotal} buyerInfo={buyerInfo} onSuccess={handlePaymentSuccess} />
+                         </Elements>
+                      ) : (
+                        items.length > 0 && ( /* Ensure checking items properly */
+                            <button 
+                                onClick={handleCheckout}
+                                className="w-full bg-[#F85E46] text-white font-bold py-4 rounded-lg shadow-md hover:bg-[#e54d36] transition duration-200 mb-4"
+                            >
+                                Confirm & Pay
+                            </button>
+                        )
+                      )}
 
-                      <button className="w-full bg-[#F85E46] text-white font-bold py-4 rounded-lg shadow-md hover:bg-[#e54d36] transition duration-200 mb-4">
-                          Confirm & Pay
-                      </button>
+                      {error && (
+                          <div className="bg-red-50 text-red-500 text-sm p-3 rounded-md mb-4 border border-red-100">
+                             {error}
+                          </div>
+                      )}
                       
                       <p className="text-[10px] text-gray-500 mb-6 leading-tight">
                           By clicking 'Confirm & Pay' you agree to our <span className="underline cursor-pointer">Privacy & Conditions</span>
@@ -193,9 +268,6 @@ export default function CartPage() {
                           </div>
                           <div className="flex items-center gap-2">
                               <span className="bg-white p-1 rounded-full shadow-sm">💲</span> No hidden costs
-                          </div>
-                          <div className="flex items-center gap-2">
-                              <span className="bg-white p-1 rounded-full shadow-sm">🎧</span> 24/7 customer support worldwide
                           </div>
                       </div>
 

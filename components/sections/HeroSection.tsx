@@ -32,9 +32,10 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl font-poppins md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-8">
-            No matter where you&apos;re going to, we&apos;ll take you there
+          <h1 className="text-4xl font-poppins md:text-5xl lg:text-6xl font-bold text-white leading-tight ">
+            Your Complete Dubai Experience Starts Here
           </h1>
+          <p className='text-white/90 text-lg mb-4 mt-2'>From iconic landmarks to thrilling adventures, we handle it all</p>
 
           {/* Search Box */}
           <div className="bg-white rounded-full p-2 flex items-center shadow-lg max-w-lg">

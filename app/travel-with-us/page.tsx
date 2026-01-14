@@ -14,6 +14,7 @@ function TravelContent() {
   const categoryId = searchParams.get('category');
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('date');
 
   useEffect(() => {
@@ -27,13 +28,14 @@ function TravelContent() {
           setPackages(json.data.map((pkg: any) => ({
             id: pkg._id,
             image: pkg.image,
-            date: pkg.duration, // Mapping duration to 'date' badge
-            reviews: pkg.peopleGoing, // Mapping people to reviews count
-            city: pkg.title, // Mapping title to city
+            date: pkg.duration,
+            reviews: pkg.peopleGoing,
+            city: pkg.title,
             description: pkg.description,
             price: pkg.price,
             rating: pkg.rating,
             slug: pkg.slug,
+             title: pkg.title, // Ensure title is mapped for search
           })));
         }
       } catch (error) {
@@ -45,6 +47,15 @@ function TravelContent() {
 
     fetchPackages();
   }, [categoryId]);
+
+  const filteredPackages = packages.filter((pkg) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      pkg.city.toLowerCase().includes(query) || 
+      pkg.description.toLowerCase().includes(query) ||
+      (pkg.title && pkg.title.toLowerCase().includes(query))
+    );
+  });
 
   return (
     <div className="min-h-screen bg-[#FFFFFF]">
@@ -83,10 +94,10 @@ function TravelContent() {
             <section className="w-full lg:w-[58%]">
               {loading ? (
                   <div className="text-center py-10">Loading packages...</div>
-              ) : packages.length > 0 ? (
+              ) : filteredPackages.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[...packages].sort((a, b) => {
+                        {[...filteredPackages].sort((a, b) => {
                           if (sortOption === 'price-low') {
                             return a.price - b.price;
                           } else if (sortOption === 'price-high') {
@@ -115,7 +126,7 @@ function TravelContent() {
 
             {/* Sidebar - RIGHT */}
             <aside className="w-full lg:w-[42%]">
-              <TripSidebar />
+              <TripSidebar onSearch={setSearchQuery} />
             </aside>
           </div>
         </div>

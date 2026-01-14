@@ -26,7 +26,7 @@ const BookingSchema = new mongoose.Schema({
     adults: { type: Number, default: 0 },
     children: { type: Number, default: 0 },
     infants: { type: Number, default: 0 },
-    totalGuests: { type: Number, required: true }
+    totalGuests: { type: Number } // Made optional or derived
   },
   
   pricing: {
@@ -35,11 +35,20 @@ const BookingSchema = new mongoose.Schema({
   },
 
   contactInfo: {
-    fullName: String,
+    firstName: String,
+    lastName: String,
     email: String,
     phone: String,
+    countryCode: String,
     specialRequests: String
   },
+
+  paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending'
+  },
+  paymentIntentId: String,
 
   status: {
     type: String,

@@ -10,6 +10,7 @@ import CurrentPackagesSection from '@/components/sections/CurrentPackagesSection
 import FavouriteBooking from '@/components/sections/FavouriteBooking';
 import ViewPackagesSection from '@/components/sections/ViewPackagesSection';
 import PromotionSection from '@/components/sections/PromotionSection';
+import PackagesOnTheBaseOfCategories from '@/components/sections/PackagesOnTheBaseOfCategories';
 
 export default function Home() {
   return (
@@ -18,12 +19,13 @@ export default function Home() {
       <HeroSection />
       <ServicesSection />
       <CategoriesSection />
-      <EuropeToursSection />
+      {/* <EuropeToursSection /> */}
       <TrendingPackagesSection />
-      <CTASection />
+      {/* <CTASection /> */}
       <CurrentPackagesSection />
+      <PackagesOnTheBaseOfCategories/>
       <FavouriteBooking />
-      <ViewPackagesSection />
+      {/* <ViewPackagesSection /> */}
       <PromotionSection />
       <Footer />
     </main>
