@@ -62,7 +62,7 @@ export async function PUT(request: Request) {
         // Ensure dir exists (it should)
         const filepath = path.join(uploadDir, filename);
         await writeFile(filepath, compressedBuffer);
-        updateData.image = `/uploads/${filename}`;
+        updateData.image = `/api/uploads/${filename}`;
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(id, updateData, { new: true });
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
     await writeFile(filepath, compressedBuffer);
 
-    const imageUrl = `/uploads/${filename}`;
+    const imageUrl = `/api/uploads/${filename}`;
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 

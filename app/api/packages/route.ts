@@ -133,7 +133,7 @@ export async function POST(request: Request) {
         .toBuffer();
 
       await writeFile(filepath, compressedBuffer);
-      return `/uploads/${filename}`;
+      return `/api/uploads/${filename}`;
     };
 
     // Upload Main Image

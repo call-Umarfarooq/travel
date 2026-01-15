@@ -15,10 +15,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'randomuser.me',
       },
-      {
-        protocol: 'http',
-        hostname: 'ock4gscw880og80owcg8gcgw.31.97.48.137.sslip.io',
-      },
+      // Add production domain from environment variable if set
+      ...(process.env.NEXT_PUBLIC_APP_URL
+        ? [
+            {
+              protocol: process.env.NEXT_PUBLIC_APP_URL.startsWith('https') ? 'https' as const : 'http' as const,
+              hostname: new URL(process.env.NEXT_PUBLIC_APP_URL).hostname,
+            },
+          ]
+        : []),
     ],
   },
 };
