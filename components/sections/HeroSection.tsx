@@ -1,22 +1,33 @@
 import React from 'react';
 import Image from 'next/image';
+import VideoCarousel from '@/components/VideoCarousel';
+
+// Define the list of videos
+const heroVideos = [
+  '/videos/178130-858860163_small.mp4',
+  '/videos/203951-922734722_small.mp4',
+  '/videos/4368059-hd_1920_1080_30fps.mp4',
+  '/videos/8464868-hd_1920_1080_30fps.mp4',
+  '/videos/19448052-uhd_3840_2160_50fps.mp4',
+  '/videos/6754121-uhd_3840_2160_30fps.mp4',
+  '/videos/8359171-uhd_2560_1440_25fps.mp4',
+  '/videos/5057526-uhd_3840_2160_25fps.mp4',
+  '/videos/5057438-uhd_3840_2160_25fps.mp4',
+  '/videos/13427706_3840_2160_25fps.mp4',
+  '/videos/14900416_3840_2160_25fps.mp4',
+  '/videos/12754278_3840_2160_30fps.mp4',
+  '/videos/7169446-uhd_3840_2160_25fps.mp4',
+  '/videos/5077164-uhd_3840_2160_25fps.mp4',
+  '/videos/0_Woman_Desert_3840x2160.mov',
+];
 
 const HeroSection: React.FC = () => {
   return (
     <section className="relative min-h-[800px] flex items-center">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <Image
-          src="/images/main-section.png"
-          alt="Traveler looking at mountains"
-          fill
-          className="object-cover"
-          priority
-        />
-        {/* Subtle overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
-      </div>
-        <div className='w-full max-w-7xl mx-auto px-4 sm:px-6 '>
+      {/* Background Video Carousel */}
+      <VideoCarousel videos={heroVideos} />
+      
+      <div className='w-full max-w-7xl mx-auto px-4 sm:px-6 '>
       <div className="px-4 sm:px-6  relative z-10 pt-24 pb-16">
         <div className="max-w-xl">
           {/* Decorative Wave */}
