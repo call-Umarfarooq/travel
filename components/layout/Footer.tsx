@@ -50,8 +50,8 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Logo & Description */}
           <div>
-           <Link href="/" className="flex py-3 items-center gap-1">
-            <Image src="/images/logo.webp" alt="Logo" width={200} height={100} />
+           <Link href="/" className="flex  items-center gap-1">
+            <Image src="/images/Desert 2.png" alt="Logo" width={200} height={100} />
           </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
               Travel helps companies manage payments easily.(Smart Journeys. Unforgettable Experiences.)

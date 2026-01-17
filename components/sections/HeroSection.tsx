@@ -23,7 +23,7 @@ const heroVideos = [
 
 const HeroSection: React.FC = () => {
   return (
-    <section className="relative min-h-[800px] flex items-center">
+    <section className="relative max-h-[84vh] h-[66vh] md:h-[84vh] flex items-center">
       {/* Background Video Carousel */}
       <VideoCarousel videos={heroVideos} />
       
@@ -87,8 +87,8 @@ const HeroSection: React.FC = () => {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-        <div className="w-8 h-1 bg-white/60 rounded-full" />
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+        <div className="w-4 h-1 bg-white/60 rounded-full" />
       </div>
     </section>
   );

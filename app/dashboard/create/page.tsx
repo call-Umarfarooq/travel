@@ -420,6 +420,12 @@ function CreatePackageContent() {
       // Itinerary & Services
       data.append('itinerary', itinerary);
 
+      // Separate existing images from new uploads for Gallery
+      // We know new uploads are in galleryFiles.
+      // We need to find which previews are NOT blob urls (meaning they are existing server urls)
+      const existingGallery = galleryPreviews.filter(url => !url.startsWith('blob:'));
+      data.append('existingGallery', JSON.stringify(existingGallery));
+
       galleryFiles.forEach(file => data.append('gallery', file));
 
       const method = isEditing ? 'PUT' : 'POST';

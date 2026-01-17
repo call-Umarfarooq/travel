@@ -5,6 +5,7 @@ import Category from '@/models/Category'; // Import to ensure model registration
 import path from 'path';
 import { writeFile } from 'fs/promises';
 import sharp from 'sharp';
+import { uploadImage } from '@/lib/file-upload';
 
 export async function GET(request: Request) {
   try {
@@ -59,6 +60,7 @@ export async function PUT(request: Request) {
     // Extract fields to update
     const updateData: any = {};
     
+    // Text Fields
     const title = formData.get('title') as string;
     if (title) updateData.title = title;
     
@@ -69,14 +71,71 @@ export async function PUT(request: Request) {
     if (formData.get('category')) updateData.category = formData.get('category');
     if (formData.get('includes')) updateData.includes = formData.get('includes');
     if (formData.get('highlights')) updateData.highlights = formData.get('highlights');
+    if (formData.get('itinerary')) updateData.itinerary = formData.get('itinerary');
+    if (formData.get('minAge')) updateData.minAge = Number(formData.get('minAge'));
+    if (formData.get('maxAge')) updateData.maxAge = Number(formData.get('maxAge'));
+    if (formData.has('durationDays')) updateData.durationDays = Number(formData.get('durationDays'));
+    if (formData.has('durationHours')) updateData.durationHours = Number(formData.get('durationHours'));
+
+
+    // Complex JSON fields
+    if (formData.get('tags')) {
+        try {
+            updateData.tags = JSON.parse(formData.get('tags') as string);
+        } catch (e) { console.error("Error parsing tags", e); }
+    }
+    if (formData.get('features')) {
+        try {
+            updateData.features = JSON.parse(formData.get('features') as string);
+        } catch (e) { console.error("Error parsing features", e); }
+    }
+    if (formData.get('tourOptions')) {
+        try {
+            updateData.tourOptions = JSON.parse(formData.get('tourOptions') as string);
+        } catch (e) { console.error("Error parsing tourOptions", e); }
+    }
     
-    // Handle Image Update (Optional)
+    // Handle Image Update
     const imageFile = formData.get('image') as File;
-    // We need the helper function again or move it to a util. For now, duplicating succinct logic or relying on existing image if not provided.
-    // Since we can't easily reuse the helper inside POST without refactoring, I'll assume for this iteration we skip image update optimization or need to duplicate/extract logic.
-    // Let's defer complex image update logic for a moment and focus on text fields, or just basic file handling if provided.
+    if (imageFile && imageFile.size > 0) {
+        updateData.image = await uploadImage(imageFile);
+    }
+
+    // Handle Gallery Update
+    // We expect 'existingGallery' (JSON array of URLs) and/or 'gallery' (File[])
+    const existingGalleryJson = formData.get('existingGallery') as string;
+    let finalGallery: string[] = [];
+
+    if (existingGalleryJson) {
+        try {
+            finalGallery = JSON.parse(existingGalleryJson);
+        } catch (e) {
+            console.error("Error parsing existingGallery", e);
+        }
+    } else {
+         // If not sent, maybe we shouldn't wipe it? 
+         // But usually if the frontend supports it, it sends the current state.
+         // If we strictly follow the form, if 'existingGallery' is missing, it means none?
+         // For safety, if the field is missing entirely, we might want to fetch existing?
+         // But let's assume frontend sends what it wants to keep.
+         // To be safe, let's fetch current if we are unsure, OR assume frontend sends `existingGallery`.
+         // We will update frontend to send `existingGallery`.
+    }
+
+    const galleryFiles = formData.getAll('gallery') as File[];
+    if (galleryFiles && galleryFiles.length > 0) {
+      for (const file of galleryFiles) {
+        if (file.size > 0) {
+             const url = await uploadImage(file);
+             finalGallery.push(url);
+        }
+      }
+    }
     
-    // ... Simplified update for now ...
+    // Only update gallery if we have changes (or if field was explicitly sent as empty list)
+    if (formData.has('existingGallery') || (galleryFiles && galleryFiles.length > 0)) {
+         updateData.gallery = finalGallery;
+    }
 
     const updatedPackage = await Package.findByIdAndUpdate(id, updateData, { new: true });
     
@@ -119,23 +178,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: `Missing required fields: ${missing.join(', ')}` }, { status: 400 });
     }
 
-    // Helper to upload image
-    const uploadImage = async (file: File) => {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const filename = `pkg-${Date.now()}-${file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, '-')}.jpg`;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      const filepath = path.join(uploadDir, filename);
-
-      const compressedBuffer = await sharp(buffer)
-        .resize(800, null, { withoutEnlargement: true }) 
-        .jpeg({ quality: 80 })
-        .toBuffer();
-
-      await writeFile(filepath, compressedBuffer);
-      return `/api/uploads/${filename}`;
-    };
-
     // Upload Main Image
     const imageUrl = await uploadImage(imageFile);
 
@@ -151,7 +193,6 @@ export async function POST(request: Request) {
     }
 
     // Create Slug
-    // Parse Features
     // Parse Features
     const featuresJson = formData.get('features') as string;
     let features = [];
@@ -179,12 +220,6 @@ export async function POST(request: Request) {
     try {
         if (tourOptionsJson) {
             tourOptions = JSON.parse(tourOptionsJson);
-            console.log('DEBUG: Parsed Tour Options:', JSON.stringify(tourOptions, null, 2));
-            tourOptions.forEach((opt: any, idx: number) => {
-                console.log(`DEBUG: Option ${idx} Extra Services:`, opt.extraServices);
-                console.log(`DEBUG: Option ${idx} Time Slots:`, opt.timeSlots);
-                console.log(`DEBUG: Option ${idx} Duration Type:`, opt.tourDurationType);
-            });
         }
     } catch (e) {
         console.error("Failed to parse tourOptions", e);
