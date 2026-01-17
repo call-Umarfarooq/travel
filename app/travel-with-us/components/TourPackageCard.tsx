@@ -42,7 +42,7 @@ const TourPackageCard: React.FC<PackageCardProps> = ({ data, isHighlighted = fal
         </p>
 
         <div className="flex items-center justify-between">
-          <span className="text-[#F85E46] font-bold text-xs">{data.price} $</span>
+          <span className="text-[#F85E46] font-bold text-xs">{data.price} AED</span>
           <div className="flex items-center gap-1">
             <span className="text-yellow-400 text-[10px]">★</span>
             <span className="text-gray-500 text-[10px]">{data.rating}</span>

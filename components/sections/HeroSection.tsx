@@ -43,7 +43,7 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Heading */}
-          <h1 className="text-4xl font-poppins md:text-5xl lg:text-6xl font-bold text-white leading-tight ">
+          <h1 className="text-3xl font-poppins md:text-4xl lg:text-5xl font-bold text-white leading-tight ">
             Your Complete Dubai Experience Starts Here
           </h1>
           <p className='text-white/90 text-lg mb-4 mt-2'>From iconic landmarks to thrilling adventures, we handle it all</p>

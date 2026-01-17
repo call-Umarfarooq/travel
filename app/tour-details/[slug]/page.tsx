@@ -233,9 +233,9 @@ export default function CityTourPage() {
       
       {/* Hero Section */}
       <section
-        className="relative h-[30vh] min-h-[250px] w-full bg-cover bg-center flex flex-col justify-center items-center"
+        className="relative h-[30vh] min-h-[340px] w-full bg-cover bg-center flex flex-col justify-center items-center"
         style={{
-          backgroundImage: "url('/images/travel-with-us.svg')",
+          backgroundImage: `url('${activeData.image || '/images/travel-with-us.svg'}')`,
         }}
       >
         <div className="absolute inset-0 bg-black/20"></div>
@@ -243,7 +243,7 @@ export default function CityTourPage() {
           <p className="text-[10px] uppercase tracking-[0.3em] mb-3 opacity-90">
             Tour Details
           </p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif italic font-normal">
+          <h1 className="text-4xl md:text-5xl lg:text-5xl font-serif italic font-normal">
             {activeData.title}
           </h1>
         </div>

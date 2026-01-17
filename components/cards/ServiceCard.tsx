@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ServiceCardProps {
   icon: React.ReactNode;
-  title: string;
+  title: any;
   description: string;
 }
 

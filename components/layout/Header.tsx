@@ -113,7 +113,7 @@ const Header: React.FC<{ color?: string }> = ({ color  }) => {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 bg-[#DF6951] text-white font-semibold rounded-[10px] hover:bg-primary-dark transition-all"
             >
-              Get in Touch
+              +971508778139
             </Link>
           </div>
 

@@ -7,6 +7,7 @@ const TrendingPackagesSection: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(1);
   const [packages, setPackages] = useState<any[]>([]);
+ 
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -14,8 +15,17 @@ const TrendingPackagesSection: React.FC = () => {
         const res = await fetch('/api/packages');
         const data = await res.json();
         if (data.success) {
-          // Verify data structure and map if necessary
-          setPackages(data.data); 
+          // Filter by specific IDs
+          const targetIds = [
+            '696a6de9a6aa739d9f2a3ad8',
+            '696a7611a6aa739d9f2a45c3',
+            '696a7e01a6aa739d9f2a4a34',
+            '696a99e6a6aa739d9f2a8b26',
+            '696a932ba6aa739d9f2a7217',
+            '696a66b5a6aa739d9f2a3739'
+          ];
+          const filteredPackages = data.data.filter((pkg: any) => targetIds.includes(pkg._id));
+          setPackages(filteredPackages); 
         }
       } catch (error) {
         console.error('Failed to fetch packages:', error);

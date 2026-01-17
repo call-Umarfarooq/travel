@@ -16,16 +16,32 @@ function TravelContent() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('date');
+  const [headerTitle, setHeaderTitle] = useState('Travel With Us');
+  const [headerImage, setHeaderImage] = useState('/images/travel-with-us.svg');
 
   useEffect(() => {
-    const fetchPackages = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
         const query = categoryId ? `?category=${categoryId}` : '';
-        const res = await fetch(`/api/packages${query}`);
-        const json = await res.json();
-        if (json.success) {
-          setPackages(json.data.map((pkg: any) => ({
+        
+        // Fetch Packages
+        const packagesPromise = fetch(`/api/packages${query}`).then(res => res.json());
+        
+        // Fetch Category Name if categoryId exists
+        let categoryPromise: Promise<any> = Promise.resolve(null);
+        if (categoryId) {
+            // Determine if passed ID is likely an ObjectId or Slug
+            const isObjectId = /^[0-9a-fA-F]{24}$/.test(categoryId);
+            const paramName = isObjectId ? 'id' : 'slug';
+            categoryPromise = fetch(`/api/categories?${paramName}=${categoryId}`).then(res => res.json());
+        }
+
+        const [packagesData, categoryData] = await Promise.all([packagesPromise, categoryPromise]);
+
+        // Process Packages
+        if (packagesData.success) {
+          setPackages(packagesData.data.map((pkg: any) => ({
             id: pkg._id,
             image: pkg.image,
             date: pkg.duration,
@@ -38,14 +54,28 @@ function TravelContent() {
              title: pkg.title, // Ensure title is mapped for search
           })));
         }
+
+        // Process Category Title & Image
+        if (categoryData && categoryData.success && categoryData.data) {
+            setHeaderTitle(categoryData.data.name);
+            if (categoryData.data.image) {
+                setHeaderImage(categoryData.data.image);
+            } else {
+                 setHeaderImage('/images/travel-with-us.svg');
+            }
+        } else {
+            setHeaderTitle('Travel With Us');
+            setHeaderImage('/images/travel-with-us.svg');
+        }
+
       } catch (error) {
-        console.error('Failed to fetch packages', error);
+        console.error('Failed to fetch data', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPackages();
+    fetchData();
   }, [categoryId]);
 
   const filteredPackages = packages.filter((pkg) => {
@@ -65,7 +95,7 @@ function TravelContent() {
       <section
         className="relative h-[35vh] min-h-[400px] w-full bg-cover bg-center flex flex-col justify-center items-center"
         style={{
-          backgroundImage: "url('/images/travel-with-us.svg')",
+          backgroundImage: `url('${headerImage}')`,
         }}
       >
         {/* Dark Overlay */}
@@ -76,7 +106,7 @@ function TravelContent() {
             Search Tour
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif italic font-normal">
-            Travel With Us
+            {headerTitle} 
           </h1>
         </div>
       </section> 
@@ -120,7 +150,7 @@ function TravelContent() {
                     <Pagination totalPages={1} /> 
                   </>
               ) : (
-                  <div className="text-center py-10 text-gray-500">No packages found for this category.</div>
+                  <div className="text-center py-10 text-gray-500">No packages found for {headerTitle !== 'Travel With Us' ? headerTitle : 'this category'}.</div>
               )}
             </section>
 

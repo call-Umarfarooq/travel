@@ -1,31 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 const PromotionSection = () => {
-  const testimonials = [
-    {
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      quote: 'Vel officiis dolor ea illo aut eligendi ullam non laudantium magnam et recusandae molestiae sit iure unde aut voluptate quaerat. Id sunt provident quo possimus impedit vel doloremque obcaecati qui ullam consectetur et ipsum omnis.',
-      name: 'Christine Beckam',
-      title: 'Designer',
-    },
-    {
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      quote: 'Amazing travel experience! The team was incredibly helpful and made our vacation unforgettable. From booking to the actual trip, everything was seamless and well-organized.',
-      name: 'Robert Johnson',
-      title: 'Business Owner',
-    },
-    {
-      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      quote: 'Best travel agency I have ever worked with. They understood exactly what we wanted and delivered beyond our expectations. Highly recommend their services!',
-      name: 'Sarah Williams',
-      title: 'Marketing Manager',
-    },
-  ];
 
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    async function fetchReviews() {
+      try {
+        const res = await fetch('/api/google-reviews');
+        const data = await res.json();
+        if (data.success && data.data) {
+          // Map API data to component format
+          const formatted = data.data.map(review => ({
+            avatar: review.profile_photo_url || 'https://randomuser.me/api/portraits/lego/1.jpg',
+            quote: review.text,
+            name: review.author_name,
+            title: review.relative_time_description || 'Reviewed on Google',
+            link: review.author_url || '#'
+          }));
+          setTestimonials(formatted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reviews", error);
+        // Fallback or empty state could be handled here
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchReviews();
+  }, []);
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
@@ -35,7 +44,21 @@ const PromotionSection = () => {
     setCurrentIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
   };
 
+  // Safe access
   const currentTestimonial = testimonials[currentIndex];
+
+  if (loading) {
+      return (
+        <section className="relative py-20 lg:py-20 overflow-hidden min-h-[500px] flex items-center justify-center">
+            <div className="animate-pulse flex flex-col items-center">
+                <div className="h-4 w-32 bg-gray-200 rounded mb-4"></div>
+                <div className="h-8 w-64 bg-gray-200 rounded"></div>
+            </div>
+        </section>
+      );
+  }
+
+  if (testimonials.length === 0) return null; 
 
   return (
     <section className="relative py-20 lg:py-20 overflow-hidden">
@@ -92,37 +115,46 @@ const PromotionSection = () => {
             </svg>
           </button>
 
-          {/* Card */}
-          <div className="bg-white rounded-2xl rounded-tl-[60px] p-8 pt-16 text-center shadow-sm relative">
-            {/* Avatar */}
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2">
-              <div className="w-20 h-20 rounded-full border-4 border-gray-100 shadow-md overflow-hidden">
-                <Image
-                  src={currentTestimonial.avatar}
-                  alt={currentTestimonial.name}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
+          {/* Card - Now Clickable */}
+          <a 
+            href={currentTestimonial.link} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block group"
+          >
+            <div className="bg-white rounded-2xl rounded-tl-[60px] p-8 pt-16 text-center shadow-sm relative transition-shadow hover:shadow-xl cursor-pointer">
+              {/* Avatar */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+                <div className="w-20 h-20 rounded-full border-4 border-gray-100 shadow-md overflow-hidden group-hover:scale-110 transition-transform duration-300">
+                  {currentTestimonial?.avatar && (
+                      <Image
+                      src={currentTestimonial.avatar}
+                      alt={currentTestimonial.name}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                      />
+                  )}
+                </div>
+              </div>
+
+              {/* Quote */}
+              <div className="relative px-4 md:px-12">
+                <span className="absolute -top-2 left-0 text-6xl text-[#F85E46] font-serif leading-none">"</span>
+                <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-6 pt-4 group-hover:text-gray-700 transition-colors">
+                  {currentTestimonial?.quote}
+                </p>
+                <span className="absolute -bottom-2 right-4 text-6xl text-[#F85E46] font-serif leading-none">"</span>
+              </div>
+
+              {/* Author */}
+              <div className="mt-6">
+                <h4 className="font-bold text-gray-800 text-sm">
+                  {currentTestimonial?.name} - <span className="text-[#F85E46]">{currentTestimonial?.title}</span>
+                </h4>
               </div>
             </div>
-
-            {/* Quote */}
-            <div className="relative px-4 md:px-12">
-              <span className="absolute -top-2 left-0 text-6xl text-[#F85E46] font-serif leading-none">"</span>
-              <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-6 pt-4">
-                {currentTestimonial.quote}
-              </p>
-              <span className="absolute -bottom-2 right-4 text-6xl text-[#F85E46] font-serif leading-none">"</span>
-            </div>
-
-            {/* Author */}
-            <div className="mt-6">
-              <h4 className="font-bold text-gray-800 text-sm">
-                {currentTestimonial.name} - {currentTestimonial.title}
-              </h4>
-            </div>
-          </div>
+          </a>
 
           {/* Pagination Dots */}
           <div className="flex justify-center gap-2 mt-8">
@@ -140,6 +172,7 @@ const PromotionSection = () => {
       </div>
     </section>
   );
+
 };
 
 export default PromotionSection;

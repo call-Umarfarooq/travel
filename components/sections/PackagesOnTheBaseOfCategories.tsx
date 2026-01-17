@@ -108,7 +108,18 @@ const PackagesOnTheBaseOfCategories: React.FC = () => {
         const packagesData = await packagesRes.json();
 
         if (categoriesData.success) {
-            setCategories(categoriesData.data);
+            const targetIds = [
+                '696a6080a6aa739d9f2a372a',
+                '696a722ba6aa739d9f2a405d',
+                '696a71f9a6aa739d9f2a3faa',
+                '696a720ea6aa739d9f2a400b'
+            ];
+
+            const filteredCategories = categoriesData.data
+                .filter((cat: any) => targetIds.includes(cat._id))
+                .sort((a: any, b: any) => targetIds.indexOf(a._id) - targetIds.indexOf(b._id));
+
+            setCategories(filteredCategories);
         }
         if (packagesData.success) {
             setPackages(packagesData.data);
@@ -130,13 +141,7 @@ const PackagesOnTheBaseOfCategories: React.FC = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Main Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark leading-tight font-volkhov">
-            Top Destinations
-          </h2>
-          <p className="text-gray-500 mt-4">Discover best offers across different categories</p>
-        </div>
+    
 
         {/* Categories List */}
         <div>

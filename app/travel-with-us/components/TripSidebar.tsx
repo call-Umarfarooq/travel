@@ -50,10 +50,11 @@ const TripSidebar: React.FC<TripSidebarProps> = ({ onSearch }) => {
       {/* Travel Decoration Image */}
       <div className="relative h-52">
         <Image
-          src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800"
+          src="/images/desert 2.png"
           alt="Travel decoration"
           fill
           className="object-contain"
+          priority
         />
       </div>
     </div>
