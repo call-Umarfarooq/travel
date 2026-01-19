@@ -40,6 +40,7 @@ const BookingSchema = new mongoose.Schema({
     email: String,
     phone: String,
     countryCode: String,
+    pickupLocation: String,
     specialRequests: String
   },
 
@@ -49,6 +50,11 @@ const BookingSchema = new mongoose.Schema({
       default: 'pending'
   },
   paymentIntentId: String,
+  paymentMethod: {
+      type: String,
+      enum: ['stripe', 'cash', 'pay_later'], // 'cash' and 'pay_later' can be treated similarly
+      default: 'stripe'
+  },
 
   status: {
     type: String,
@@ -58,5 +64,12 @@ const BookingSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Prevent Mongoose Recompilation Error in Development
+if (process.env.NODE_ENV === 'development') {
+  if (mongoose.models.Booking) {
+    delete mongoose.models.Booking;
+  }
+}
 
 export default mongoose.models.Booking || mongoose.model('Booking', BookingSchema);

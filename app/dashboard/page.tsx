@@ -213,6 +213,7 @@ export default function Dashboard() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ref ID</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pick Up Location</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guests</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -232,7 +233,13 @@ export default function Dashboard() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <div className="font-medium">{booking.contactInfo?.firstName} {booking.contactInfo?.lastName}</div>
+                                        <div className="text-xs text-gray-500">{booking.contactInfo?.email}</div>
                                         <div className="text-xs text-gray-500">{booking.contactInfo?.phone}</div>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <div className="max-w-[150px] truncate" title={booking.contactInfo?.pickupLocation || 'Not provided'}>
+                                            {booking.contactInfo?.pickupLocation || '-'}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <div className="font-medium text-gray-900 truncate max-w-[150px]" title={booking.title}>{booking.title}</div>
@@ -245,11 +252,18 @@ export default function Dashboard() {
                                         {booking.pricing?.totalPrice?.toLocaleString()} AED
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                            {booking.paymentStatus || 'Pending'}
-                                        </span>
+                                        <div className="flex flex-col gap-1">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit ${
+                                                booking.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                                {booking.paymentStatus || 'Pending'}
+                                            </span>
+                                            <span className="text-[10px] text-gray-500 uppercase">
+                                                {(booking.paymentMethod === 'pay_later' || booking.paymentMethod === 'cash' || booking.paymentIntentId?.startsWith('pay_later_')) 
+                                                    ? 'User will pay by cash' 
+                                                    : 'Card'}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

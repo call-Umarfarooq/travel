@@ -5,12 +5,16 @@ import dbConnect from '@/lib/db';
 import Booking from '@/models/Booking';
 import { verifyToken } from '@/lib/auth'; // Added import
 
+import { sendBookingConfirmation } from '@/lib/mail'; // Added import
+
 export async function POST(request: Request) {
   try {
     await dbConnect();
-    const { items, buyerInfo, paymentIntentId, totalAmount } = await request.json();
+    const { items, buyerInfo, paymentIntentId, totalAmount, paymentMethod = 'stripe' } = await request.json();
 
     // Create a booking for each item in the cart
+    const newlyCreatedBookings: any[] = []; // Track created bookings for email
+
     const bookings = await Promise.all(items.map(async (item: any) => {
       // Calculate total guests
       const totalGuests = (item.adults || 0) + (item.children || 0) + (item.infants || 0);
@@ -26,7 +30,13 @@ export async function POST(request: Request) {
         }
       }
 
-      return Booking.create({
+      // Determine statuses based on payment method
+      const isPayLater = paymentMethod === 'cash' || paymentMethod === 'pay_later';
+      const pStatus = isPayLater ? 'pending' : 'paid';
+      // User said "booking to kar ly hy" -> confirmed.
+      const bStatus = 'confirmed'; 
+
+      const newBooking = await Booking.create({
         user: userId, // Associated with user if logged in
         package: item.packageId, // Corrected to use packageId
         title: item.title, // Added missing title
@@ -50,11 +60,24 @@ export async function POST(request: Request) {
             phone: buyerInfo.phone,
             countryCode: buyerInfo.countryCode,
         },
-        paymentStatus: 'paid',
+        paymentStatus: pStatus,
         paymentIntentId: paymentIntentId,
-        status: 'confirmed',
+        paymentMethod: paymentMethod, // Store method
+        status: bStatus,
       });
+      
+      newlyCreatedBookings.push(newBooking);
+      return newBooking;
     }));
+
+    // Send Confirmation Email
+    console.log("Attempting to send confirmation email for bookings:", newlyCreatedBookings.length);
+    try {
+        await sendBookingConfirmation(newlyCreatedBookings);
+        console.log("Confirmation email process completed.");
+    } catch (emailErr) {
+        console.error("Failed to send confirmation email:", emailErr);
+    }
 
     return NextResponse.json({ success: true, count: bookings.length });
   } catch (error: any) {

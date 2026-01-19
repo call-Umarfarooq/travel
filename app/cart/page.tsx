@@ -27,10 +27,50 @@ export default function CartPage() {
     email: '',
     phone: '',
     countryCode: '+971', // Default to UAE
+    pickupLocation: '',
   });
+
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'pay_later'>('stripe');
+  const [loading, setLoading] = useState(false);
 
   const handleBuyerChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setBuyerInfo({ ...buyerInfo, [e.target.name]: e.target.value });
+  };
+
+  const handlePayLaterCheckout = async () => {
+       // Basic validation
+    if (!buyerInfo.email || !buyerInfo.firstName || !buyerInfo.lastName || !buyerInfo.phone) {
+       setError("Please fill in all buyer information.");
+       return;
+    }
+    setError(null);
+    setLoading(true);
+
+    try {
+          const res = await fetch('/api/bookings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  items,
+                  buyerInfo,
+                  paymentIntentId: 'pay_later_' + Date.now(), // Generate a placeholder ID
+                  totalAmount: cartTotal,
+                  paymentMethod: 'pay_later'
+              })
+          });
+          const json = await res.json();
+          if (json.success) {
+              clearCart();
+              router.push('/booking/success');
+          } else {
+              setError("Failed to create booking. Please contact support.");
+          }
+    } catch (err) {
+        console.error(err);
+        setError("Network error. Please try again.");
+    } finally {
+        setLoading(false);
+    }
   };
 
   const handleCheckout = async () => {
@@ -162,6 +202,11 @@ export default function CartPage() {
                             <input type="tel" name="phone" value={buyerInfo.phone} onChange={handleBuyerChange} className="w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46]" />
                         </div>
                     </div>
+
+                    <div className="mt-4">
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Pick Up Location</label>
+                        <input type="text" name="pickupLocation" value={buyerInfo.pickupLocation} onChange={handleBuyerChange} placeholder="Enter your pick up address" className="w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46]" />
+                    </div>
                 </section>
 
                 {/* Cart Items */}
@@ -236,19 +281,60 @@ export default function CartPage() {
                       </div>
 
                       {/* Payment Section */}
-                      {clientSecret ? (
-                         <Elements options={options} stripe={stripePromise}>
-                             <CheckoutForm amount={cartTotal} buyerInfo={buyerInfo} onSuccess={handlePaymentSuccess} />
-                         </Elements>
+                      {/* Payment Method Selection */}
+                      <div className="mb-6 space-y-3 p-4 bg-white/50 rounded-lg">
+                          <h4 className="font-bold text-sm text-gray-700 mb-2">Select Payment Method:</h4>
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                              <input 
+                                  type="radio" 
+                                  name="paymentMethod" 
+                                  value="stripe" 
+                                  checked={paymentMethod === 'stripe'} 
+                                  onChange={() => { setPaymentMethod('stripe'); setClientSecret(null); }}
+                                  className="h-5 w-5 text-[#F85E46] focus:ring-[#F85E46]"
+                              />
+                              <span className="text-gray-800 font-medium">Pay Online (Credit/Debit Card)</span>
+                          </label>
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                              <input 
+                                  type="radio" 
+                                  name="paymentMethod" 
+                                  value="pay_later" 
+                                  checked={paymentMethod === 'pay_later'} 
+                                  onChange={() => { setPaymentMethod('pay_later'); setClientSecret(null); }}
+                                  className="h-5 w-5 text-[#F85E46] focus:ring-[#F85E46]"
+                              />
+                              <div className="flex flex-col">
+                                <span className="text-gray-800 font-medium">Book Now, Pay Later</span>
+                                <span className="text-xs text-gray-500">Pay cash/card upon arrival</span>
+                              </div>
+                          </label>
+                      </div>
+
+                      {/* Payment Section */}
+                      {paymentMethod === 'stripe' ? (
+                          clientSecret ? (
+                             <Elements options={options} stripe={stripePromise}>
+                                 <CheckoutForm amount={cartTotal} buyerInfo={buyerInfo} onSuccess={handlePaymentSuccess} />
+                             </Elements>
+                          ) : (
+                            items.length > 0 && (
+                                <button 
+                                    onClick={handleCheckout}
+                                    className="w-full bg-[#F85E46] text-white font-bold py-4 rounded-lg shadow-md hover:bg-[#e54d36] transition duration-200 mb-4"
+                                >
+                                    Proceed to Payment
+                                </button>
+                            )
+                          )
                       ) : (
-                        items.length > 0 && ( /* Ensure checking items properly */
-                            <button 
-                                onClick={handleCheckout}
-                                className="w-full bg-[#F85E46] text-white font-bold py-4 rounded-lg shadow-md hover:bg-[#e54d36] transition duration-200 mb-4"
-                            >
-                                Confirm & Pay
-                            </button>
-                        )
+                          <button 
+                              onClick={handlePayLaterCheckout}
+                              disabled={loading}
+                              className="w-full bg-[#181E4B] text-white font-bold py-4 rounded-lg shadow-md hover:bg-[#12163a] transition duration-200 mb-4 disabled:opacity-50"
+                          >
+                              {loading ? 'Processing...' : 'Confirm Booking'}
+                          </button>
                       )}
 
                       {error && (

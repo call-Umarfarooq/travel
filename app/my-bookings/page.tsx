@@ -69,8 +69,17 @@ export default function MyBookingsPage() {
         ) : (
           <div className="grid gap-6">
             {bookings.map((booking) => (
-              <div key={booking._id} className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 p-6 flex flex-col md:flex-row gap-6">
-                <div className="flex-1">
+              <div key={booking._id} className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 flex flex-col md:flex-row">
+                {booking.package?.image && (
+                  <div className="w-full md:w-48 h-48 md:h-auto relative shrink-0">
+                    <img
+                      src={booking.package.image}
+                      alt={booking.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 p-6">
                   <div className="flex flex-wrap justify-between items-start mb-4">
                      <div>
                         <h3 className="text-xl font-bold text-gray-900 mb-1">{booking.title}</h3>

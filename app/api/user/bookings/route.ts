@@ -28,7 +28,7 @@ export async function GET() {
       ]
     })
       .sort({ createdAt: -1 })
-      .populate('package', 'price images duration location'); // Populate useful package details
+      .populate('package', 'price image duration location'); // Populate useful package details
 
     return NextResponse.json({ success: true, data: bookings });
   } catch (error: any) {
