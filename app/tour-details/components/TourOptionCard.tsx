@@ -257,21 +257,26 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                   
                   {/* Time Slots Grid */}
                   {timeSlots && timeSlots.length > 0 && (
-                    <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
-                      {timeSlots.map((slot, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setSelectedTimeSlot(slot)}
-                          className={`px-4 py-2 rounded-lg text-sm md:text-[18px] font-medium transition-colors border
-                            ${selectedTimeSlot === slot 
-                              ? 'bg-[#F85E46] text-white border-[#F85E46]' 
-                              : 'bg-[#E8E8E8] text-[#000000] border-transparent hover:bg-gray-300'
-                            }`}
-                        >
-                          {slot}
-                        </button>
-                      ))}
-                    </div>
+                    <>
+                      <p className="text-sm md:text-[16px] text-[#F85E46] font-medium mb-3">
+                        Please select a time frame to continue
+                      </p>
+                      <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
+                        {timeSlots.map((slot, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedTimeSlot(slot)}
+                            className={`px-4 py-2 rounded-lg text-sm md:text-[18px] font-medium transition-colors border
+                              ${selectedTimeSlot === slot 
+                                ? 'bg-[#F85E46] text-white border-[#F85E46]' 
+                                : 'bg-[#E8E8E8] text-[#000000] border-transparent hover:bg-gray-300'
+                              }`}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
              )}

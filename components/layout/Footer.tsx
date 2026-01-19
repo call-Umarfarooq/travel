@@ -27,6 +27,7 @@ const Footer: React.FC = () => {
   const companyLinks = [
     { label: 'About Us', href: '/about' },
     { label: 'Blog', href: '/blog' },
+    { label: 'Terms & Conditions', href: '/terms-and-conditions' },
   ];
 
   const handleB2BClick = (e: React.MouseEvent) => {
