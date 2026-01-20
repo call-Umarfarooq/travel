@@ -78,7 +78,7 @@ const HeroSection: React.FC = () => {
               ))}
             </div>
             <p className="text-white/90 text-sm">
-              <span className="font-semibold">2,500 people</span> booked Tommorrowland Event in last 24 hours
+              Join thousands of happy guests who explored Dubai with us
             </p>
           </div>
         </div>

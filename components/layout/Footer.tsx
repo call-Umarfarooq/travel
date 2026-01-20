@@ -106,7 +106,7 @@ const Footer: React.FC = () => {
                     onClick={handleB2BClick}
                     className="text-gray-400 text-sm hover:text-[#F85E46] transition-colors text-left"
                   >
-                    B2B Partnerships & Collaborations
+                    B2B Inquries 
                   </button>
               </li>
             </ul>

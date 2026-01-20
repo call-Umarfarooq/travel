@@ -87,7 +87,7 @@ const PromotionSection = () => {
           <span className="text-[#F85E46] font-semibold text-sm tracking-wider uppercase mb-3 block">
             Promotion
           </span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 leading-tight font-serif italic">
+          <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold text-gray-800 leading-tight font-serif italic">
             See What Our Clients Say<br />
             About Us
           </h2>

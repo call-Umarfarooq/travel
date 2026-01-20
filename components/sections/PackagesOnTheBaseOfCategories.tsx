@@ -109,9 +109,9 @@ const PackagesOnTheBaseOfCategories: React.FC = () => {
 
         if (categoriesData.success) {
             const targetIds = [
+                '696a71f9a6aa739d9f2a3faa',
                 '696a6080a6aa739d9f2a372a',
                 '696a722ba6aa739d9f2a405d',
-                '696a71f9a6aa739d9f2a3faa',
                 '696a720ea6aa739d9f2a400b'
             ];
 

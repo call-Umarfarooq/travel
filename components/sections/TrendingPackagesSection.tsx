@@ -18,11 +18,11 @@ const TrendingPackagesSection: React.FC = () => {
           // Filter by specific IDs
           const targetIds = [
             '696a6de9a6aa739d9f2a3ad8',
-            '696a7611a6aa739d9f2a45c3',
-            '696a7e01a6aa739d9f2a4a34',
+            '696a66b5a6aa739d9f2a3739',
+              '696a7611a6aa739d9f2a45c3',
+              '696a7e01a6aa739d9f2a4a34',
             '696a99e6a6aa739d9f2a8b26',
-            '696a932ba6aa739d9f2a7217',
-            '696a66b5a6aa739d9f2a3739'
+            '696a932ba6aa739d9f2a7217'
           ];
           const filteredPackages = data.data.filter((pkg: any) => targetIds.includes(pkg._id));
           setPackages(filteredPackages); 
@@ -60,7 +60,7 @@ const TrendingPackagesSection: React.FC = () => {
           {/* <span className="text-primary font-semibold text-sm uppercase tracking-wider mb-4 block">
             TRENDY
           </span> */}
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-dark leading-tight">
+          <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold text-dark leading-tight">
             Our Trending Tour
             <br />
             Packages

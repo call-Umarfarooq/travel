@@ -22,7 +22,7 @@ const SectionTitle: React.FC<SectionTitleProps> = ({
           {subtitle}
         </p>
       )} */}
-      <h2 className={`text-3xl md:text-4xl lg:text-[50px] font-volkhov font-bold leading-tight ${light ? 'text-white' : 'text-[#181E4B]'}`}>
+      <h2 className={`text-3xl md:text-4xl lg:text-4xl font-volkhov font-bold leading-tight ${light ? 'text-white' : 'text-[#181E4B]'}`}>
         {title}
       </h2>
     

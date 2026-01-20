@@ -69,13 +69,13 @@ const FavouriteBooking = () => {
           </div>
 
           {/* Right - Image (extends beyond container) */}
-          <div className="lg:w-[60%] relative mt-12 lg:mt-0 lg:-mr-[15%]">
+          <div className="w-full rounded-2xl lg:w-[60%] relative mt-12 lg:mt-0 lg:-mr-[15%]">
             <Image
-              src="/images/favourite.svg"
-              alt="Favourite Resort Bookings"
+              src="/images/corporate.jpg"
+              alt="Corporate & Group Experiences"
               width={700}
               height={500}
-              className="w-full h-auto"
+              className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover rounded-2xl"
             />
           </div>
         </div>

@@ -28,7 +28,7 @@ const CurrentPackagesSection: React.FC = () => {
           <div className="lg:w-1/2">
             <div className="rounded-2xl overflow-hidden border-[6px] border-gray-200 shadow-sm h-full w-full relative">
               <Image
-                src="/images/customtover.svg"
+                src="/images/custom.jpg"
                 alt="Dubai Frame"
                 fill
                 className="object-cover"
