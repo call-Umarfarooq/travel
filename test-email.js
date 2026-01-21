@@ -1,32 +1,33 @@
 
 const nodemailer = require('nodemailer');
 
-const EMAIL_USER = "uf71384@gmail.com";
-const EMAIL_PASS = "nrrj oznt gmpr ftsz";
+
+require('dotenv').config({ path: '.env.local' });
 
 async function main() {
   console.log("Starting email test v2...");
   
-  // Try explicit SMTP configuration for Gmail
+  // Try explicit SMTP configuration
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+    port: Number(process.env.SMTP_PORT) || 465,
+    secure: process.env.SMTP_SECURE === 'true',
     auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
     tls: {
-      rejectUnauthorized: false // Helps in dev environments
+      rejectUnauthorized: false 
     },
     debug: true,
     logger: true 
   });
 
+
   try {
     const info = await transporter.sendMail({
-      from: `"Test v2" <${EMAIL_USER}>`,
-      to: EMAIL_USER, 
+      from: `"Test v2" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER, 
       subject: "Test Email v2",
       text: "Testing with explicit SMTP settings.",
     });

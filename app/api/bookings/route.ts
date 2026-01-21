@@ -74,8 +74,8 @@ export async function POST(request: Request) {
     // Send Confirmation Email
     console.log("Attempting to send confirmation email for bookings:", newlyCreatedBookings.length);
     try {
-        await sendBookingConfirmation(newlyCreatedBookings);
-        console.log("Confirmation email process completed.");
+        const emailResult = await sendBookingConfirmation(newlyCreatedBookings);
+        console.log("Confirmation email process completed. Result:", emailResult);
     } catch (emailErr) {
         console.error("Failed to send confirmation email:", emailErr);
     }

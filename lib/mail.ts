@@ -1,23 +1,19 @@
 import nodemailer from 'nodemailer';
 
-// Email credentials
-const EMAIL_USER = "uf71384@gmail.com";
-const EMAIL_PASS = "nrrj oznt gmpr ftsz";
 
-// Create reusable transporter object using the default SMTP transport
-// Create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
   auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
   tls: {
-      rejectUnauthorized: false // Helps in dev environments with self-signed certs
+      rejectUnauthorized: false // Helps in dev environments
   }
 });
+
 
 interface BookingDetails {
     _id: string;
@@ -42,7 +38,19 @@ interface BookingDetails {
 
 export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
   try {
-    if (!bookings || bookings.length === 0) return;
+    console.log("sendBookingConfirmation called.");
+    console.log("SMTP Config Check:", {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: process.env.SMTP_SECURE,
+        user: process.env.SMTP_USER ? 'DEFINED' : 'UNDEFINED',
+        pass: process.env.SMTP_PASS ? 'DEFINED' : 'UNDEFINED'
+    });
+
+    if (!bookings || bookings.length === 0) {
+        console.warn("sendBookingConfirmation: No bookings provided.");
+        return;
+    }
 
     const buyer = bookings[0].contactInfo;
     const totalAmount = bookings.reduce((sum, b) => sum + (b.pricing?.totalPrice || 0), 0);
@@ -63,7 +71,7 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     // --- Send Email to Customer ---
     const customerMailOptions = {
         // ... options
-      from: `"Travel Agency" <${EMAIL_USER}>`,
+      from: `"Travel Agency" <${process.env.SMTP_USER}>`,
       to: buyer.email,
       subject: `Booking Confirmation - ${String(bookings[0]._id).substring(String(bookings[0]._id).length - 6).toUpperCase()}`,
       html: `
@@ -92,8 +100,8 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
 
     // --- Send Email to Admin ---
     const adminMailOptions = {
-      from: `"Travel Agency System" <${EMAIL_USER}>`,
-      to: EMAIL_USER, // Sending to admin (same email for now, or configurable)
+      from: `"Travel Agency System" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_USER, // Sending to admin (same email for now, or configurable)
       subject: `New Booking Received - ${paymentMethod}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
@@ -118,8 +126,11 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     console.log('All emails sent successfully');
     return true;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('CRITICAL: Error sending emails in sendBookingConfirmation:', error);
+    if (error.response) {
+        console.error("SMTP Response:", error.response);
+    }
     return false;
   }
 };
