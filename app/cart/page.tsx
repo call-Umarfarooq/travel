@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Image from 'next/image';
@@ -29,6 +29,14 @@ export default function CartPage() {
     countryCode: '+971', // Default to UAE
     pickupLocation: '',
   });
+
+  // Auto-fill pickup location if present in any cart item
+  useEffect(() => {
+    const itemWithLocation = items.find(item => item.pickupLocation);
+    if (itemWithLocation && itemWithLocation.pickupLocation && !buyerInfo.pickupLocation) {
+        setBuyerInfo(prev => ({ ...prev, pickupLocation: itemWithLocation.pickupLocation || '' }));
+    }
+  }, [items]);
 
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'pay_later'>('stripe');
   const [loading, setLoading] = useState(false);
@@ -203,10 +211,12 @@ export default function CartPage() {
                         </div>
                     </div>
 
-                    <div className="mt-4">
-                        <label className="block text-xs font-semibold text-gray-500 mb-1">Pick Up Location</label>
-                        <input type="text" name="pickupLocation" value={buyerInfo.pickupLocation} onChange={handleBuyerChange} placeholder="Enter your pick up address" className="w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46]" />
-                    </div>
+                    {items.some(item => item.pickupLocation) && (
+                        <div className="mt-4">
+                            <label className="block text-xs font-semibold text-gray-500 mb-1">Pick Up Location</label>
+                            <input type="text" name="pickupLocation" value={buyerInfo.pickupLocation} onChange={handleBuyerChange} placeholder="Enter your pick up address" className="w-full bg-gray-200 border-none rounded-md px-4 py-3 focus:ring-2 focus:ring-[#F85E46]" />
+                        </div>
+                    )}
                 </section>
 
                 {/* Cart Items */}
@@ -233,7 +243,7 @@ export default function CartPage() {
                                            <span>📅</span> {new Date(item.date).toLocaleDateString()}
                                         </div>
                                         <div className="flex items-center gap-1">
-                                           <span>⏰</span> {item.time}
+                                           <span>⏰</span> {item.timeSlot || item.time}
                                         </div>
                                         <div className="flex items-center gap-1">
                                            <span>👥</span> 
@@ -242,6 +252,11 @@ export default function CartPage() {
                                               : `${(item.adults || 0) + (item.children || 0) + (item.infants || 0)} Guests`
                                            }
                                         </div>
+                                        {item.pickupLocation && (
+                                            <div className="flex items-center gap-1 w-full mt-2 text-[#181E4B]">
+                                                <span>📍</span> <span className="font-semibold">Pick Up:</span> {item.pickupLocation}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex justify-between items-center text-sm">

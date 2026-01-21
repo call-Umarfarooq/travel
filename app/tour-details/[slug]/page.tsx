@@ -118,6 +118,9 @@ export default function CityTourPage() {
       children: guestDetails.children || 0,
       infants: guestDetails.infants || 0,
       
+      timeSlot: guestDetails.timeSlot,
+      pickupLocation: guestDetails.pickupLocation,
+      
       totalPrice: Number(guestDetails.totalPrice)
     };
 

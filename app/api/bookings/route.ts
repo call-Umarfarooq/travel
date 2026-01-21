@@ -59,6 +59,7 @@ export async function POST(request: Request) {
             email: buyerInfo.email,
             phone: buyerInfo.phone,
             countryCode: buyerInfo.countryCode,
+            pickupLocation: item.pickupLocation || buyerInfo.pickupLocation,
         },
         paymentStatus: pStatus,
         paymentIntentId: paymentIntentId,

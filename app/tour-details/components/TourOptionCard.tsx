@@ -33,6 +33,7 @@ interface TourOptionCardProps {
     guests?: number;
     items?: number;
     timeSlot?: string; // New
+    pickupLocation?: string;
     totalPrice: string;
   }) => void;
 }
@@ -73,7 +74,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   const [items, setItems] = useState(1);
 
   // Extra Services State
-  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+  // Extra Services State
+  // Map of index -> quantity
+  const [extrasQuantities, setExtrasQuantities] = useState<{[key: number]: number}>({});
+  const [pickupLocation, setPickupLocation] = useState('');
 
   // Backward compatibility
   const finalAdultPrice = adultPrice ?? pricePerPerson ?? 253.50;
@@ -106,12 +110,17 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
     }
   };
 
-  const toggleExtraService = (index: number) => {
-    setSelectedExtras(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index) 
-        : [...prev, index]
-    );
+  const handleExtraChange = (index: number, delta: number) => {
+    setExtrasQuantities(prev => {
+        const current = prev[index] || 0;
+        const newCount = Math.max(0, current + delta);
+        
+        const newState = { ...prev, [index]: newCount };
+        if (newCount === 0) {
+            delete newState[index];
+        }
+        return newState;
+    });
   };
 
   // Calculate Total
@@ -125,11 +134,12 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
     }
 
     // Add selected extras
-    const extrasTotal = selectedExtras.reduce((sum, idx) => {
+    // Add selected extras
+    const extrasTotal = Object.entries(extrasQuantities).reduce((sum, [idx, qty]) => {
       // Handle price as string or number
-      const priceStr = extraServices[idx]?.price || '0';
+      const priceStr = extraServices[parseInt(idx)]?.price || '0';
       const price = parseFloat(priceStr.toString());
-      return sum + (isNaN(price) ? 0 : price);
+      return sum + ((isNaN(price) ? 0 : price) * qty);
     }, 0);
 
     return (baseTotal + extrasTotal).toFixed(2);
@@ -144,6 +154,14 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
            if (timeSlots && timeSlots.length > 0 && !selectedTimeSlot) {
                return { valid: false, msg: 'Please select a time slot.' };
            }
+      }
+
+      // Check for Private Transfer requirement
+      const privateTransferIndex = extraServices.findIndex(s => s.name === 'Private Transfer');
+      const isPrivateTransfer = privateTransferIndex !== -1 && (extrasQuantities[privateTransferIndex] || 0) > 0;
+      
+      if (isPrivateTransfer && !pickupLocation.trim()) {
+          return { valid: false, msg: 'Please enter a Pick Up Location for Private Transfer.' };
       }
       
       return { valid: true };
@@ -164,6 +182,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         items: pricingType === 'group' ? items : 0,
         // For 'days', we might fallback to generic time or just empty/null effectively
         timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : time,
+        pickupLocation: (extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) ? pickupLocation : undefined,
         totalPrice: calculateTotal() 
       };
       if(onBookNow) onBookNow({...details, action: action} as any);
@@ -377,25 +396,59 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
               <div className="mb-6">
                 <h4 className="text-base md:text-[20px] font-semibold text-[#181E4B] mb-3">Extra Services:</h4>
                 <div className="space-y-3">
-                  {extraServices.map((service, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <input 
-                          type="checkbox" 
-                          id={`extra-${idx}`}
-                          checked={selectedExtras.includes(idx)}
-                          onChange={() => toggleExtraService(idx)}
-                          className="w-5 h-5 text-[#F85E46] rounded focus:ring-[#F85E46]"
-                        />
-                        <label htmlFor={`extra-${idx}`} className="text-sm md:text-[18px] text-gray-800 cursor-pointer select-none">
-                          {service.name}
-                        </label>
-                      </div>
-                      <span className="font-medium text-[#F85E46]">{service.price} {currency}</span>
-                     </div>
-                  ))}
+                  {extraServices.map((service, idx) => {
+                    const quantity = extrasQuantities[idx] || 0;
+                    return (
+                        <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3">
+                            {/* Checkbox for simple toggle feeling, effectively 0 or 1, but we want counters */}
+                            {/* Let's just use counters for "increase and decrease" functionality */}
+                            <span className="text-sm md:text-[18px] text-gray-800 select-none font-medium">
+                                {service.name}
+                            </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-2">
+                                <button 
+                                    onClick={() => handleExtraChange(idx, -1)}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition ${quantity === 0 ? 'bg-gray-200 text-gray-400' : 'bg-white text-[#F85E46] border border-[#F85E46] hover:bg-gray-50'}`}
+                                    disabled={quantity === 0}
+                                >
+                                    −
+                                </button>
+                                <span className={`w-6 text-center font-bold text-[18px] ${quantity > 0 ? 'text-[#181E4B]' : 'text-gray-400'}`}>{quantity}</span>
+                                <button 
+                                    onClick={() => handleExtraChange(idx, 1)}
+                                    className="w-8 h-8 rounded-full bg-[#F85E46] text-white flex items-center justify-center hover:bg-[#e54d36] transition shadow-sm font-bold text-lg"
+                                >
+                                    +
+                                </button>
+                             </div>
+                             <span className="font-medium text-[#F85E46] w-16 text-right">{(parseFloat(service.price) * (quantity || 1)).toFixed(0)} {currency}</span>
+                        </div>
+                        </div>
+                    );
+                  })}
                 </div>
               </div>
+            )}
+
+            {/* Conditional Pick Up Location Input */}
+            {(extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) && (
+                <div className="mb-6">
+                    <label htmlFor="pickup-location" className="block text-sm md:text-[18px] font-semibold text-[#181E4B] mb-2">
+                        Pick Up Location <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="pickup-location"
+                        value={pickupLocation}
+                        onChange={(e) => setPickupLocation(e.target.value)}
+                        placeholder="Enter your hotel name or address"
+                        className="w-full p-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-[#F85E46] focus:border-transparent"
+                    />
+                </div>
             )}
 
 

@@ -12,6 +12,8 @@ export interface CartItem {
   // Option Details
   optionTitle: string;
   time: string;
+  timeSlot?: string;
+  pickupLocation?: string;
   date: Date;
   
   // Pricing & Guests
