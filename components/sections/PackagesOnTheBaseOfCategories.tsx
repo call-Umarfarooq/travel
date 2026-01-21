@@ -32,6 +32,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ category, packages }) => {
     }
   };
 
+ 
   return (
     <div className="mb-12 last:mb-0">
         <div className="text-left mb-6 px-8">
@@ -96,33 +97,67 @@ const PackagesOnTheBaseOfCategories: React.FC = () => {
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Define the specific sequence for the first category
+  const firstCategoryPackageOrder = [
+    "696a6de9a6aa739d9f2a3ad8",
+    "696a6c75a6aa739d9f2a38a5",
+    "696a66b5a6aa739d9f2a3739",
+    "696a7146a6aa739d9f2a3d56",
+    "696a6fc2a6aa739d9f2a3d03"
+  ];
+const secondCategoryPackageOrder = [
+    "696a7611a6aa739d9f2a45c3",
+    "696a7393a6aa739d9f2a4202",
+    "696e741ad0fa4bad67ae576f",
+    "696e749bd0fa4bad67ae5a0a",
+    
+  ];
+
+
+  const thirdCategoryPackageOrder = [
+    "696a7ce4a6aa739d9f2a4960",
+    "696a7abba6aa739d9f2a47f2",
+    "696a79fba6aa739d9f2a4740",
+    "696a784ca6aa739d9f2a46a5",
+    "696a7e01a6aa739d9f2a4a34"
+  ];
+
+  const fourthCategoryPackageOrder = [
+    "696a99e6a6aa739d9f2a8b26",
+    "696a932ba6aa739d9f2a7217",
+    "696a8ca7a6aa739d9f2a62af",
+    "696a9ac2a6aa739d9f2a8d7d",
+    
+    
+  ];
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [categoriesRes, packagesRes] = await Promise.all([
-            fetch('/api/categories'),
-            fetch('/api/packages')
+          fetch('/api/categories'),
+          fetch('/api/packages')
         ]);
 
         const categoriesData = await categoriesRes.json();
         const packagesData = await packagesRes.json();
 
         if (categoriesData.success) {
-            const targetIds = [
-               '696a6080a6aa739d9f2a372a',
-                '696a71f9a6aa739d9f2a3faa',
-                '696a722ba6aa739d9f2a405d',
-                '696a720ea6aa739d9f2a400b'
-            ];
+          const targetIds = [
+            '696a6080a6aa739d9f2a372a',
+            '696a722ba6aa739d9f2a405d',
+            '696a71f9a6aa739d9f2a3faa',
+            '696a720ea6aa739d9f2a400b'
+          ];
 
-            const filteredCategories = categoriesData.data
-                .filter((cat: any) => targetIds.includes(cat._id))
-                .sort((a: any, b: any) => targetIds.indexOf(a._id) - targetIds.indexOf(b._id));
+          const filteredCategories = categoriesData.data
+            .filter((cat: any) => targetIds.includes(cat._id))
+            .sort((a: any, b: any) => targetIds.indexOf(a._id) - targetIds.indexOf(b._id));
 
-            setCategories(filteredCategories);
+          setCategories(filteredCategories);
         }
         if (packagesData.success) {
-            setPackages(packagesData.data);
+          setPackages(packagesData.data);
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -135,37 +170,57 @@ const PackagesOnTheBaseOfCategories: React.FC = () => {
   }, []);
 
   if (loading) {
-      return <div className="py-20 text-center text-gray-500">Loading tours...</div>;
+    return <div className="py-20 text-center text-gray-500">Loading tours...</div>;
   }
 
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-    
+    <div className="max-w-7xl mx-auto px-4">
+      <div>
+        {categories.map((category, catIndex) => {
+          // 1. Get packages belonging to this category
+          let categoryPackages = packages.filter(pkg => {
+            const pkgCatId = typeof pkg.category === 'object' ? pkg.category?._id : pkg.category;
+            return pkgCatId === category._id;
+          });
 
-        {/* Categories List */}
-        <div>
-            {categories.map((category) => {
-                // Filter packages for this category
-                // Handle both: category as Object (populated) or String (ID)
-                const categoryPackages = packages.filter(pkg => {
-                    const pkgCatId = typeof pkg.category === 'object' ? pkg.category?._id : pkg.category;
-                    return pkgCatId === category._id;
-                });
+          // 2. Apply custom sorting based on Category Index
+          categoryPackages = categoryPackages.sort((a, b) => {
+            let orderList: string[] = [];
 
-                if (categoryPackages.length === 0) return null;
+            if (catIndex === 0) orderList = firstCategoryPackageOrder;
+            else if (catIndex === 1) orderList = secondCategoryPackageOrder;
+            else if (catIndex === 2) orderList = thirdCategoryPackageOrder;
+            else if (catIndex === 3) orderList = fourthCategoryPackageOrder;
 
-                return (
-                    <CategoryRow 
-                        key={category._id} 
-                        category={category} 
-                        packages={categoryPackages} 
-                    />
-                );
-            })}
-        </div>
+            // Agar koi order list mil jaye to sort karein
+            if (orderList.length > 0) {
+              const indexA = orderList.indexOf(a._id);
+              const indexB = orderList.indexOf(b._id);
+
+              // If ID is not in the list, move it to the end
+              const finalIndexA = indexA === -1 ? 999 : indexA;
+              const finalIndexB = indexB === -1 ? 999 : indexB;
+
+              return finalIndexA - finalIndexB;
+            }
+            
+            return 0; // Default no sorting for other categories
+          });
+
+          if (categoryPackages.length === 0) return null;
+
+          return (
+            <CategoryRow 
+              key={category._id} 
+              category={category} 
+              packages={categoryPackages} 
+            />
+          );
+        })}
       </div>
-    </section>
+    </div>
+  </section>
   );
 };
 

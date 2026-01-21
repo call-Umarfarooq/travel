@@ -9,31 +9,36 @@ const TrendingPackagesSection: React.FC = () => {
   const [packages, setPackages] = useState<any[]>([]);
  
 
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const res = await fetch('/api/packages');
-        const data = await res.json();
-        if (data.success) {
-          // Filter by specific IDs
-          const targetIds = [
-            '696a6de9a6aa739d9f2a3ad8',
-            '696a66b5a6aa739d9f2a3739',
-              '696a7611a6aa739d9f2a45c3',
-              '696a7e01a6aa739d9f2a4a34',
-            '696a99e6a6aa739d9f2a8b26',
-            '696a932ba6aa739d9f2a7217'
-          ];
-          const filteredPackages = data.data.filter((pkg: any) => targetIds.includes(pkg._id));
-          setPackages(filteredPackages); 
-        }
-      } catch (error) {
-        console.error('Failed to fetch packages:', error);
-      }
-    };
+ useEffect(() => {
+  const fetchPackages = async () => {
+    try {
+      const res = await fetch('/api/packages');
+      const data = await res.json();
+      
+      if (data.success) {
+        const targetIds = [
+          '696a6de9a6aa739d9f2a3ad8',
+          '696a66b5a6aa739d9f2a3739',
+          '696a7611a6aa739d9f2a45c3',
+          '696a7e01a6aa739d9f2a4a34',
+          '696a99e6a6aa739d9f2a8b26',
+          '696a932ba6aa739d9f2a7217'
+        ];
 
-    fetchPackages();
-  }, []);
+        // Map through targetIds to guarantee the sequence
+        const sequencedPackages = targetIds
+          .map(id => data.data.find((pkg: any) => pkg._id === id))
+          .filter(pkg => pkg !== undefined); // Remove any IDs that weren't found in the API
+
+        setPackages(sequencedPackages);
+      }
+    } catch (error) {
+      console.error('Failed to fetch packages:', error);
+    }
+  };
+
+  fetchPackages();
+}, []);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {

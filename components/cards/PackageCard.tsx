@@ -42,7 +42,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
       {/* Content */}
       <div className="p-4 flex flex-col flex-1">
         {/* Duration and People Info */}
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+        <div className="flex items-center justify-between min-w-max text-sm text-gray-500 mb-3">
           <div className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth={2} />

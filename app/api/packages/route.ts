@@ -7,6 +7,9 @@ import { writeFile } from 'fs/promises';
 import sharp from 'sharp';
 import { uploadImage } from '@/lib/file-upload';
 
+
+
+
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
