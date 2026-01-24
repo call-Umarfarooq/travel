@@ -51,7 +51,7 @@ const Footer: React.FC = () => {
           {/* Logo & Description */}
           <div>
            <Link href="/" className="flex  items-center gap-1">
-            <Image src="/images/Desert 2.png" alt="Logo" width={200} height={100} />
+            <Image src="/images/Desert_2-removebg-preview1.png" alt="Logo" width={200} height={100} />
           </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
               Travel helps companies manage payments easily.(Smart Journeys. Unforgettable Experiences.)

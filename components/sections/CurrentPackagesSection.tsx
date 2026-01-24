@@ -26,12 +26,12 @@ const CurrentPackagesSection: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Left - Image */}
           <div className="lg:w-1/2">
-            <div className="rounded-2xl overflow-hidden border-[6px] border-gray-200 shadow-sm h-full w-full relative">
+            <div className="rounded-2xl overflow-hidden  h-full w-full relative">
               <Image
-                src="/images/custom.jpg"
+                src="/images/CorporateGroup.png"
                 alt="Dubai Frame"
                 fill
-                className="object-fill"
+                className="object-contain"
               />
             </div>
           </div>
