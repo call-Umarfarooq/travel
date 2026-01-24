@@ -4,21 +4,19 @@ import VideoCarousel from '@/components/VideoCarousel';
 
 // Define the list of videos
 const heroVideos = [
-  '/videos/178130-858860163_small.mp4',
-  '/videos/203951-922734722_small.mp4',
-  '/videos/4368059-hd_1920_1080_30fps.mp4',
-  '/videos/8464868-hd_1920_1080_30fps.mp4',
-  '/videos/19448052-uhd_3840_2160_50fps.mp4',
-  '/videos/6754121-uhd_3840_2160_30fps.mp4',
-  '/videos/8359171-uhd_2560_1440_25fps.mp4',
-  '/videos/5057526-uhd_3840_2160_25fps.mp4',
-  '/videos/5057438-uhd_3840_2160_25fps.mp4',
-  '/videos/13427706_3840_2160_25fps.mp4',
-  '/videos/14900416_3840_2160_25fps.mp4',
-  '/videos/12754278_3840_2160_30fps.mp4',
-  '/videos/7169446-uhd_3840_2160_25fps.mp4',
-  '/videos/5077164-uhd_3840_2160_25fps.mp4',
-  '/videos/0_Woman_Desert_3840x2160.mov',
+  'https://dubaijourneytourism.com/wp-content/uploads/2026/01/5077164-uhd_3840_2160_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/5057438-uhd_3840_2160_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/19448052-uhd_3840_2160_50fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/13427706_3840_2160_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/7169446-uhd_3840_2160_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/6754121-uhd_3840_2160_30fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/8464868-hd_1920_1080_30fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/8359171-uhd_2560_1440_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/4368059-hd_1920_1080_30fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/14900416_3840_2160_25fps.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/203951-922734722_small.mp4',
+  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/178130-858860163_small.mp4',
+  
 ];
 
 const HeroSection: React.FC = () => {
