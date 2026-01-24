@@ -1,64 +1,37 @@
-import nodemailer from 'nodemailer';
 
+import { NextResponse } from 'next/server';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  tls: {
-      rejectUnauthorized: false // Helps in dev environments
-  }
-});
-
-
-interface BookingDetails {
-    _id: string;
-    contactInfo: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        [key: string]: any;
-    };
-    items?: any[]; // For cart bookings
-    package?: any; // For direct bookings if any
-    title?: string;
-    date: Date;
+export async function GET() {
+  const mockBooking = {
+    _id: "671fb8d1923456abcdef",
+    title: "Dinner Show",
+    date: new Date("2024-10-23"),
+    guestDetails: {
+      adults: 2,
+      children: 2
+    },
     pricing: {
-        totalPrice: number;
-        currency: string;
-    };
-    paymentMethod: string; // 'stripe' | 'cash'
-    status: string;
-    [key: string]: any;
-}
+      totalPrice: 1090,
+      currency: "AED"
+    },
+    contactInfo: {
+        firstName: "Peter",
+        lastName: "Reid",
+        email: "peter.reid209@googlemail.com",
+        phone: "+971 505,848,841",
+        pickupLocation: "Adagio premium west beach, palm"
+    },
+    paymentMethod: 'stripe'
+  };
+  
+  const bookings = [mockBooking];
+  const buyer = bookings[0].contactInfo;
+  const currency = bookings[0].pricing.currency;
+  const totalAmount = bookings[0].pricing.totalPrice;
+  const paymentMethod = 'Paid Online (Stripe)';
 
-export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
-  try {
-    console.log("sendBookingConfirmation called.");
-    console.log("SMTP Config Check:", {
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
-        user: process.env.SMTP_USER ? 'DEFINED' : 'UNDEFINED',
-        pass: process.env.SMTP_PASS ? 'DEFINED' : 'UNDEFINED'
-    });
-
-    if (!bookings || bookings.length === 0) {
-        console.warn("sendBookingConfirmation: No bookings provided.");
-        return;
-    }
-
-    const buyer = bookings[0].contactInfo;
-    const totalAmount = bookings.reduce((sum, b) => sum + (b.pricing?.totalPrice || 0), 0);
-    const currency = bookings[0].pricing?.currency || 'AED';
-    const paymentMethod = bookings[0].paymentMethod === 'cash' ? 'Pay Later (Cash)' : 'Paid Online (Stripe)';
-
-    // Build Items List HTML
-    const itemsHtml = bookings.map(b => `
+    // Build Items List HTML (Copied from lib/mail.ts logic for preview)
+    const itemsHtml = bookings.map((b: any) => `
       <div style="margin-bottom: 30px; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #fff; padding: 15px; border-bottom: 1px solid #eee; text-align: center;">
              <h2 style="margin: 0; font-size: 18px; color: #000;">Tour Details</h2>
@@ -86,10 +59,12 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Pickup:</td>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.contactInfo?.pickupLocation || 'Not specified'}</td>
             </tr>
+           
             <tr>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Payment Method:</td>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${paymentMethod}</td>
             </tr>
+           
              <tr>
                 <td style="padding: 10px 15px; font-weight: bold;">Order sum:</td>
                 <td style="padding: 10px 15px;">${b.pricing?.totalPrice || 0} ${currency}</td>
@@ -98,15 +73,7 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
       </div>
     `).join('');
 
-    console.log(`Preparing to send email to ${buyer.email} for booking ${bookings[0]._id}`);
-
-    // --- Send Email to Customer ---
-    const customerMailOptions = {
-        // ... options
-      from: `"Travel Agency" <${process.env.SMTP_USER}>`,
-      to: buyer.email,
-      subject: `Order confirmation No ${String(bookings[0]._id).substring(String(bookings[0]._id).length - 6).toUpperCase()}`,
-      html: `
+  const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           
           <div style="text-align: center; margin-bottom: 20px;">
@@ -136,7 +103,7 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
             </div>
              <div style="margin-bottom: 10px;">
                 <span style="font-weight: bold; color: #555;">Payment date No:</span> 
-                <span>${new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })}</span>
+                <span>${new Date("2024-10-19T06:14:10").toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })}</span>
             </div>
           </div>
 
@@ -144,47 +111,9 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
             Thank you for choosing us!
           </p>
         </div>
-      `,
-    };
+      `;
 
-    console.log("Sending customer email...");
-    const customerInfo = await transporter.sendMail(customerMailOptions);
-    console.log("Customer email sent. MessageId:", customerInfo.messageId);
-
-
-    // --- Send Email to Admin ---
-    const adminMailOptions = {
-      from: `"Travel Agency System" <${process.env.SMTP_USER}>`,
-      to: process.env.SMTP_USER, // Sending to admin (same email for now, or configurable)
-      subject: `New Booking Received - ${paymentMethod}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-          <h2>New Booking Alert</h2>
-          <p><strong>Customer:</strong> ${buyer.firstName} ${buyer.lastName}</p>
-          <p><strong>Email:</strong> ${buyer.email}</p>
-          <p><strong>Phone:</strong> ${buyer.phone}</p>
-          <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-          <p><strong>Total Amount:</strong> ${currency} ${totalAmount}</p>
-          
-          <hr/>
-          <h3>Items:</h3>
-          ${itemsHtml}
-        </div>
-      `,
-    };
-
-    console.log("Sending admin email...");
-    const adminInfo = await transporter.sendMail(adminMailOptions);
-    console.log("Admin email sent. MessageId:", adminInfo.messageId);
-
-    console.log('All emails sent successfully');
-    return true;
-
-  } catch (error: any) {
-    console.error('CRITICAL: Error sending emails in sendBookingConfirmation:', error);
-    if (error.response) {
-        console.error("SMTP Response:", error.response);
-    }
-    return false;
-  }
-};
+  return new NextResponse(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
+}

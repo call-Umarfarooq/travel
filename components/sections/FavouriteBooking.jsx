@@ -39,7 +39,7 @@ const FavouriteBooking = () => {
       <div className="container-custom">
         <div className="flex flex-col lg:flex-row items-center">
           {/* Left - Content */}
-          <div className="lg:w-[40%] lg:pr-8">
+          <div className="lg:w-[50%] lg:pr-8">
             <span className="text-[#F85E46] font-medium text-sm mb-2 block">
               Fast & Easy
             </span>
@@ -69,13 +69,13 @@ const FavouriteBooking = () => {
           </div>
 
           {/* Right - Image (extends beyond container) */}
-          <div className="w-full rounded-2xl lg:w-[60%] relative mt-12 lg:mt-0 lg:-mr-[15%]">
+          <div className="w-full rounded-2xl lg:w-[50%] relative mt-12 lg:mt-0 lg:-mr-[15%]">
             <Image
               src="/images/corporate.jpg"
               alt="Corporate & Group Experiences"
               width={700}
               height={500}
-              className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-cover rounded-2xl"
+              className="w-full h-[300px] sm:h-[400px] lg:h-[500px] object-contain rounded-2xl"
             />
           </div>
         </div>

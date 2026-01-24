@@ -31,7 +31,7 @@ const CurrentPackagesSection: React.FC = () => {
                 src="/images/custom.jpg"
                 alt="Dubai Frame"
                 fill
-                className="object-cover"
+                className="object-fill"
               />
             </div>
           </div>
