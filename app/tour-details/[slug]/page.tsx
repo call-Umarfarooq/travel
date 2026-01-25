@@ -120,6 +120,7 @@ export default function CityTourPage() {
       
       timeSlot: guestDetails.timeSlot,
       pickupLocation: guestDetails.pickupLocation,
+      extraServices: guestDetails.extraServices || [],
       
       totalPrice: Number(guestDetails.totalPrice)
     };
@@ -298,7 +299,7 @@ export default function CityTourPage() {
 
               {/* About This Activity */}
               <section className="mt-16">
-                <h2 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">
+                <h2 className="text-xl md:text-2xl font-bold text-[#1E3A5F] mb-4">
                   About This Activity
                 </h2>
                 <p className="text-base md:text-[20px] text-[#000000] leading-relaxed mb-8">
@@ -324,7 +325,7 @@ export default function CityTourPage() {
             {/* Itinerary Section */}
             {activeData.itinerary && (
               <section className="mt-8">
-                <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Itinerary</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-[#1E3A5F] mb-4">Itinerary</h3>
                 {Array.isArray(activeData.itinerary) && activeData.itinerary.length > 0 ? (
                   // Legacy Array Format
                   <div className="space-y-6">
@@ -363,7 +364,7 @@ export default function CityTourPage() {
 
             {/* Highlights Section */}
             <section className="mt-8">
-              <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Highlights</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-[#1E3A5F] mb-4">Highlights</h3>
               <div 
                 className="text-base md:text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside break-words"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.highlights) }}
@@ -375,7 +376,7 @@ export default function CityTourPage() {
 
             {/* Includes Section */}
             <section className="mt-8">
-              <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Includes</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-[#1E3A5F] mb-4">Includes</h3>
               <div 
                 className="text-base md:text-[20px] text-[#000000] space-y-2 [&>ul]:list-disc [&>ul]:list-inside break-words"
                 dangerouslySetInnerHTML={{ __html: getHtmlContent(activeData.includes) }}
@@ -387,7 +388,7 @@ export default function CityTourPage() {
 
               {/* Details Section */}
               <section className="mt-8 mb-8">
-                <h3 className="text-2xl md:text-[32px] font-bold text-[#1E3A5F] mb-4">Details</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-[#1E3A5F] mb-4">Details</h3>
                 <p className="text-base md:text-[20px] text-[#000000] leading-relaxed break-words">
                    {activeData.description}
                 </p>

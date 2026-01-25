@@ -81,7 +81,7 @@ export default function ReviewsSection({ packageId }: { packageId: string }) {
         {loading ? (
             <p>Loading reviews...</p>
         ) : reviews.length === 0 ? (
-            <p className="text-gray-500 italic">No reviews yet. Be the first to review!</p>
+            <p className="text-gray-500 italic"></p>
         ) : (
             reviews.map((review) => (
                 <div key={review._id} className="bg-white p-4 rounded-lg shadow-sm">
@@ -128,7 +128,7 @@ export default function ReviewsSection({ packageId }: { packageId: string }) {
                 </div>
             </div>
             
-            <div className="mb-4">
+            {/* <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
                 <textarea 
                     value={comment}
@@ -137,15 +137,14 @@ export default function ReviewsSection({ packageId }: { packageId: string }) {
                     className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary"
                     rows={3}
                 />
-            </div>
+            </div> */}
 
-            <button
-               type="submit"
-               disabled={submitting}
+            <Link href={"https://www.google.com/search?sca_esv=38663ec9571eddc2&rlz=1C1CHBD_enPK1126PK1126&sxsrf=ANbL-n4_XEgwvI5JWy5R2WLhcOCN4IAk6w:1769277155460&si=AL3DRZEsmMGCryMMFSHJ3StBhOdZ2-6yYkXd_doETEE1OR-qOfLz2tZF6r2rHdTlji8xhbx5xq9XvKPjA2I_ZKt1lykWY1vf-RfR20YnkgYBEo5WwO5RB-diIuuLqvv0Y3N62VylGIVz547xou_iTe9d9kCytdlLCg%3D%3D&q=Desert+Smart+Tourism+LLC+Reviews&sa=X&ved=2ahUKEwjR6_CC36SSAxXiKvsDHUe5O7EQ0bkNegQIKBAH&biw=1707&bih=791&dpr=1.13&aic=0#lrd=0x3e5f6d47cd9b84d3:0x9792c0b22134c2fe,3"}
+               target="_blank"
                className="bg-[#F85E46] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#e54d36] transition-colors disabled:opacity-50"
             >
                 {submitting ? 'Submitting...' : 'Submit Review'}
-            </button>
+            </Link>
          </form>
       </div>
     </section>

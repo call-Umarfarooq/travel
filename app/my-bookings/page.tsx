@@ -114,7 +114,35 @@ export default function MyBookingsPage() {
                             {booking.paymentStatus?.toUpperCase()}
                         </span>
                     </div>
-                  </div>
+                    </div>
+
+                  {/* Pickup Location */}
+                  {booking.contactInfo?.pickupLocation && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                       <span className="block text-gray-400 text-xs mb-1">Pickup Location</span>
+                       <p className="text-sm text-gray-800 font-medium">{booking.contactInfo.pickupLocation}</p>
+                    </div>
+                  )}
+
+                  {/* Extra Services */}
+                  {booking.extraServices && booking.extraServices.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <span className="block text-gray-400 text-xs mb-2">Extra Services</span>
+                        <div className="space-y-2">
+                            {booking.extraServices.map((extra: any, idx: number) => (
+                                <div key={idx} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded-lg">
+                                    <span className="font-medium text-gray-700">
+                                        {extra.name} 
+                                        <span className="text-gray-500 font-normal ml-1">x{extra.quantity}</span>
+                                    </span>
+                                    <span className="font-medium text-gray-900">
+                                        {booking.pricing?.currency} {extra.total}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import B2BInquiry from '@/models/B2BInquiry';
+import { sendB2BEmails } from '@/lib/mail';
 
 export async function POST(request: Request) {
   try {
@@ -14,6 +15,16 @@ export async function POST(request: Request) {
     }
 
     const inquiry = await B2BInquiry.create({
+      fullName,
+      companyName,
+      businessEmail,
+      phone,
+      country,
+      message,
+    });
+
+    // Send emails
+    await sendB2BEmails({
       fullName,
       companyName,
       businessEmail,

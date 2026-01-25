@@ -4,16 +4,30 @@ import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.hostinger.com',
   port: Number(process.env.SMTP_PORT) || 465,
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465, // Force secure if 465
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
   tls: {
       rejectUnauthorized: false // Helps in dev environments
-  }
+  },
+  connectionTimeout: 10000, // 10 seconds
+  socketTimeout: 10000 // 10 seconds
 });
 
+// Helper for retry logic
+const sendMailWithRetry = async (mailOptions: any, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.warn(`Email attempt ${i + 1} failed:`, error);
+            if (i === retries - 1) throw error;
+            await new Promise(res => setTimeout(res, 1000)); // Wait 1s before retry
+        }
+    }
+};
 
 interface BookingDetails {
     _id: string;
@@ -103,7 +117,7 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     // --- Send Email to Customer ---
     const customerMailOptions = {
         // ... options
-      from: `"Travel Agency" <${process.env.SMTP_USER}>`,
+      from: `"Desert Smart Tourism" <${process.env.SMTP_USER}>`,
       to: buyer.email,
       subject: `Order confirmation No ${String(bookings[0]._id).substring(String(bookings[0]._id).length - 6).toUpperCase()}`,
       html: `
@@ -141,20 +155,20 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
           </div>
 
           <p style="margin-top: 40px; font-size: 12px; color: #999; text-align: center;">
-            Thank you for choosing us!
+            Thank you for choosing Desert Smart Tourism!
           </p>
         </div>
       `,
     };
 
     console.log("Sending customer email...");
-    const customerInfo = await transporter.sendMail(customerMailOptions);
-    console.log("Customer email sent. MessageId:", customerInfo.messageId);
+    const customerInfo = await sendMailWithRetry(customerMailOptions);
+    console.log("Customer email sent. MessageId:", customerInfo?.messageId);
 
 
     // --- Send Email to Admin ---
     const adminMailOptions = {
-      from: `"Travel Agency System" <${process.env.SMTP_USER}>`,
+      from: `"Desert Smart Tourism System" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_USER, // Sending to admin (same email for now, or configurable)
       subject: `New Booking Received - ${paymentMethod}`,
       html: `
@@ -174,8 +188,8 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     };
 
     console.log("Sending admin email...");
-    const adminInfo = await transporter.sendMail(adminMailOptions);
-    console.log("Admin email sent. MessageId:", adminInfo.messageId);
+    const adminInfo = await sendMailWithRetry(adminMailOptions);
+    console.log("Admin email sent. MessageId:", adminInfo?.messageId);
 
     console.log('All emails sent successfully');
     return true;
@@ -188,3 +202,82 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     return false;
   }
 };
+
+interface B2BInquiryData {
+    fullName: string;
+    companyName: string;
+    businessEmail: string;
+    phone: string;
+    country: string;
+    message: string;
+}
+
+export const sendB2BEmails = async (data: B2BInquiryData) => {
+    try {
+        console.log("sendB2BEmails called for:", data.businessEmail);
+
+        // --- Send Email to Owner (Info@desertsmarttourism.com) ---
+        const ownerMailOptions = {
+            from: `"Desert Smart Tourism System" <${process.env.SMTP_USER}>`,
+            to: process.env.SMTP_USER,
+            subject: `New B2B Partnership Proposal - ${data.companyName}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #DF6951;">New B2B Partnership Proposal</h2>
+                    <p><strong>Full Name:</strong> ${data.fullName}</p>
+                    <p><strong>Company Name:</strong> ${data.companyName}</p>
+                    <p><strong>Email:</strong> ${data.businessEmail}</p>
+                    <p><strong>Phone:</strong> ${data.phone}</p>
+                    <p><strong>Country:</strong> ${data.country}</p>
+                    
+                    <hr style="border: 1px solid #eee; margin: 20px 0;" />
+                    
+                    <h3 style="margin-bottom: 10px;">Message:</h3>
+                    <p style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${data.message}</p>
+                </div>
+            `,
+        };
+
+        // --- Send Confirmation to Sender ---
+        const senderMailOptions = {
+            from: `"Desert Smart Tourism" <${process.env.SMTP_USER}>`,
+            to: data.businessEmail,
+            subject: `Received: Your B2B Partnership Proposal`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+                    <div style="text-align: center; padding: 20px 0;">
+                        <h2 style="color: #DF6951;">Proposal Received</h2>
+                    </div>
+                    
+                    <p>Dear ${data.fullName},</p>
+                    
+                    <p>Thank you for reaching out to Desert Smart Tourism! We have received your partnership proposal regarding <strong>${data.companyName}</strong>.</p>
+                    
+                    <p>Our team will review your message and get back to you shortly to discuss potential collaboration opportunities.</p>
+                    
+                    <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p style="margin: 0; font-weight: bold;">Summary of your message:</p>
+                        <p style="margin-top: 5px; font-style: italic;">"${data.message}"</p>
+                    </div>
+
+                    <p>Best regards,<br>The Desert Smart Tourism Team</p>
+                </div>
+            `,
+        };
+
+        // Send both emails using existing retry logic
+        console.log("Sending B2B owner email...");
+        await sendMailWithRetry(ownerMailOptions);
+        
+        console.log("Sending B2B sender confirmation...");
+        await sendMailWithRetry(senderMailOptions);
+
+        console.log("B2B emails sent successfully");
+        return true;
+
+    } catch (error) {
+        console.error('Error in sendB2BEmails:', error);
+        return false;
+    }
+};
+

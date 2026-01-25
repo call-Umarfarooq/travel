@@ -183,7 +183,19 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         // For 'days', we might fallback to generic time or just empty/null effectively
         timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : time,
         pickupLocation: (extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) ? pickupLocation : undefined,
-        totalPrice: calculateTotal() 
+        totalPrice: calculateTotal(),
+        extraServices: Object.entries(extrasQuantities)
+            .filter(([_, qty]) => qty > 0)
+            .map(([idx, qty]) => {
+                const service = extraServices[parseInt(idx)];
+                const price = parseFloat(service.price) || 0;
+                return {
+                    name: service.name,
+                    price: price,
+                    quantity: qty,
+                    total: price * qty
+                };
+            }) 
       };
       if(onBookNow) onBookNow({...details, action: action} as any);
   };

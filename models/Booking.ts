@@ -26,8 +26,16 @@ const BookingSchema = new mongoose.Schema({
     adults: { type: Number, default: 0 },
     children: { type: Number, default: 0 },
     infants: { type: Number, default: 0 },
-    totalGuests: { type: Number } // Made optional or derived
+    guests: { type: Number, default: 0 }, // Added for group bookings
+    totalGuests: { type: Number } 
   },
+  
+  extraServices: [{
+      name: String,
+      price: Number,
+      quantity: Number,
+      total: Number
+  }],
   
   pricing: {
     totalPrice: { type: Number, required: true },

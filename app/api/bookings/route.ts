@@ -16,8 +16,10 @@ export async function POST(request: Request) {
     const newlyCreatedBookings: any[] = []; // Track created bookings for email
 
     const bookings = await Promise.all(items.map(async (item: any) => {
-      // Calculate total guests
-      const totalGuests = (item.adults || 0) + (item.children || 0) + (item.infants || 0);
+      // Calculate total guests - prioritizing 'guests' for group tours if present and > 0, otherwise sum people
+      const totalGuests = (item.guests && item.guests > 0) 
+        ? item.guests 
+        : (item.adults || 0) + (item.children || 0) + (item.infants || 0);
 
       const cookieStore = await cookies();
       const token = cookieStore.get('token')?.value;
@@ -47,8 +49,10 @@ export async function POST(request: Request) {
             adults: item.adults || 0,
             children: item.children || 0,
             infants: item.infants || 0,
+            guests: item.guests || 0,
             totalGuests: totalGuests
         },
+        extraServices: item.extraServices || [], // Save extra services
         pricing: {
             totalPrice: item.totalPrice,
             currency: 'AED' 
