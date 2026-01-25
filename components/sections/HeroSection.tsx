@@ -4,11 +4,12 @@ import VideoCarousel from '@/components/VideoCarousel';
 
 // Define the list of videos
 const heroVideos = [
-  'https://dubaijourneytourism.com/wp-content/uploads/2026/01/5077164-uhd_3840_2160_25fps.mp4',
-  'http://dubaijourneytourism.com/wp-content/uploads/2026/01/5057438-uhd_3840_2160_25fps.mp4',
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/19448052-uhd_3840_2160_50fps.mp4',
+    'http://dubaijourneytourism.com/wp-content/uploads/2026/01/5057438-uhd_3840_2160_25fps.mp4',
+
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/13427706_3840_2160_25fps.mp4',
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/7169446-uhd_3840_2160_25fps.mp4',
+    'https://dubaijourneytourism.com/wp-content/uploads/2026/01/5077164-uhd_3840_2160_25fps.mp4',
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/6754121-uhd_3840_2160_30fps.mp4',
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/8464868-hd_1920_1080_30fps.mp4',
   'http://dubaijourneytourism.com/wp-content/uploads/2026/01/8359171-uhd_2560_1440_25fps.mp4',

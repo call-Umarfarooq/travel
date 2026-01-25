@@ -69,7 +69,7 @@ const VideoCarousel: React.FC<VideoCarouselProps> = ({ videos }) => {
       <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent z-20" />
       
       {/* Video indicators */}
-      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-30 flex gap-2">
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-30 hidden md:flex gap-2">
         {videos.map((_, index) => (
           <button
             key={index}

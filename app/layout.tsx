@@ -29,8 +29,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <style dangerouslySetInnerHTML={{__html: `
+          @media (max-width: 768px) {
+            ::-webkit-scrollbar {
+              display: none !important;
+              width: 0 !important;
+              height: 0 !important;
+            }
+            * {
+              scrollbar-width: none !important;
+              -ms-overflow-style: none !important;
+            }
+          }
+        `}} />
+      </head>
       <body
-        className={`${poppins.variable} ${volkhov.variable} font-sans antialiased`}
+        className={`${poppins.variable} ${volkhov.variable} font-sans antialiased overflow-x-hidden`}
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
       >
         <CartProvider>
           {children}

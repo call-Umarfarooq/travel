@@ -107,6 +107,14 @@ const Footer: React.FC = () => {
                     B2B Partnerships & Collaborations
                   </button>
               </li>
+              <li>
+                  <Link
+                    href="/terms-and-conditions"
+                    className="text-gray-400 text-sm hover:text-[#F85E46] transition-colors"
+                  >
+                    Terms and Conditions
+                  </Link>
+              </li>
             </ul>
           </div>
 
