@@ -11,6 +11,7 @@ interface TourOptionCardProps {
   time: string;
   timeSlots?: string[];
   tourDurationType?: 'hours' | 'days'; // New
+  isPickupIncluded?: boolean; // New
   
   // Pricing & Configuration
   pricingType?: 'person' | 'group';
@@ -56,6 +57,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   pricePerPerson,
   currency = 'AED',
   isExpanded = false,
+  isPickupIncluded = false, // Default false
   selectedDate,
   inclusions,
   extraServices = [],
@@ -78,6 +80,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   // Map of index -> quantity
   const [extrasQuantities, setExtrasQuantities] = useState<{[key: number]: number}>({});
   const [pickupLocation, setPickupLocation] = useState('');
+  const [pickupIncludedChecked, setPickupIncludedChecked] = useState(false); // Local toggle for the free option
 
   // Backward compatibility
   const finalAdultPrice = adultPrice ?? pricePerPerson ?? 253.50;
@@ -160,8 +163,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
       const privateTransferIndex = extraServices.findIndex(s => s.name === 'Private Transfer');
       const isPrivateTransfer = privateTransferIndex !== -1 && (extrasQuantities[privateTransferIndex] || 0) > 0;
       
-      if (isPrivateTransfer && !pickupLocation.trim()) {
-          return { valid: false, msg: 'Please enter a Pick Up Location for Private Transfer.' };
+      const isPickupRequired = isPrivateTransfer || (isPickupIncluded && pickupIncludedChecked);
+
+      if (isPickupRequired && !pickupLocation.trim()) {
+          return { valid: false, msg: 'Please enter a Pick Up Location.' };
       }
       
       return { valid: true };
@@ -182,7 +187,10 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         items: pricingType === 'group' ? items : 0,
         // For 'days', we might fallback to generic time or just empty/null effectively
         timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : time,
-        pickupLocation: (extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) ? pickupLocation : undefined,
+        pickupLocation: (
+            (extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) ||
+            (isPickupIncluded && pickupIncludedChecked)
+        ) ? pickupLocation : undefined,
         totalPrice: calculateTotal(),
         extraServices: Object.entries(extrasQuantities)
             .filter(([_, qty]) => qty > 0)
@@ -403,6 +411,33 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
               </div>
             )}
 
+             {/* Feature: Pickup Included Option (No Extra Cost) */}
+             {isPickupIncluded && (
+                <div 
+                    className={`mb-6 p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-4 ${pickupIncludedChecked ? 'bg-[#F0FFF4] border-green-200 shadow-sm' : 'bg-white border-gray-200 hover:border-gray-300'}`}
+                    onClick={() => setPickupIncludedChecked(!pickupIncludedChecked)}
+                >
+                    {/* Checkbox */}
+                    <div className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${pickupIncludedChecked ? 'bg-green-500 border-green-500' : 'bg-white border-gray-300'}`}>
+                        {pickupIncludedChecked && (
+                             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                             </svg>
+                        )}
+                    </div>
+
+                    {/* Text Content */}
+                    <div>
+                         <h5 className={`font-bold text-base md:text-lg mb-1 ${pickupIncludedChecked ? 'text-green-800' : 'text-gray-800'}`}>
+                             Free Pickup & dropoff
+                         </h5>
+                         <p className="text-sm md:text-base text-gray-500 leading-relaxed">
+                            Available from all hotels and general areas in Dubai and Sharjah.
+                         </p>
+                    </div>
+                </div>
+             )}
+
             {/* Extra Services - Rendered if available */}
             {extraServices.length > 0 && (
               <div className="mb-6">
@@ -447,7 +482,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
             )}
 
             {/* Conditional Pick Up Location Input */}
-            {(extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) && (
+            {((extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) || (isPickupIncluded && pickupIncludedChecked)) && (
                 <div className="mb-6">
                     <label htmlFor="pickup-location" className="block text-sm md:text-[18px] font-semibold text-[#181E4B] mb-2">
                         Pick Up Location <span className="text-red-500">*</span>

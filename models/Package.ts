@@ -65,6 +65,7 @@ const TourOptionSchema = new mongoose.Schema({
   title: String,
   duration: String,
   tourDurationType: { type: String, enum: ['hours', 'days'], default: 'hours' }, // New
+  isPickupIncluded: { type: Boolean, default: false }, // New
   time: String,
   timeSlots: [String], // New
   description: String,

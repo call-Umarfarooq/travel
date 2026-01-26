@@ -17,9 +17,21 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get('category');
     const slug = searchParams.get('slug');
-    const id = searchParams.get('id');
+    const search = searchParams.get('search');
+    const id = searchParams.get('id'); // Restored
 
     let query: any = {};
+    
+    // Search Logic
+    if (search) {
+        const searchRegex = new RegExp(search, 'i'); // Case-insensitive
+        query.$or = [
+            { title: { $regex: searchRegex } },
+            { location: { $regex: searchRegex } },
+            { tags: { $regex: searchRegex } }
+        ];
+    }
+
     if (categoryId) {
         // Check if categoryId is a valid ObjectId, otherwise treat as slug
         if (categoryId.match(/^[0-9a-fA-F]{24}$/)) {

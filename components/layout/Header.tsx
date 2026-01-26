@@ -30,7 +30,7 @@ const Header: React.FC<{ color?: string }> = ({ color  }) => {
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
     { label: 'Categories', href: '/', hasDropdown: true },
-    { label: 'B2B Inquiries', href: '/b2b-corporate' },
+    { label: 'Corporate Inquiries', href: '/b2b-corporate' },
     
   ];
 

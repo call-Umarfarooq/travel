@@ -112,6 +112,7 @@ function CreatePackageContent() {
         { icon: '🚗', label: 'Pickup Included' },
         { icon: '🗣️', label: 'Live Guide' }
       ],
+      isPickupIncluded: false, // New field Added
       inclusions: [],
       extraServices: [] as { name: string; price: string }[],
     }
@@ -268,6 +269,7 @@ function CreatePackageContent() {
         { icon: '🚗', label: 'Pickup Included' },
         { icon: '🗣️', label: 'Live Guide' }
       ],
+      isPickupIncluded: false, // New field Added
       inclusions: [],
       extraServices: [] as { name: string; price: string }[],
     }]);
@@ -413,7 +415,8 @@ function CreatePackageContent() {
           infantPrice: Number(opt.infantPrice) || 0,
           groupPrice: Number(opt.groupPrice) || 0,
           minPax: Number(opt.minPax) || 1,
-          maxPax: Number(opt.maxPax) || 999
+          maxPax: Number(opt.maxPax) || 999,
+          isPickupIncluded: opt.isPickupIncluded || false, // Ensure boolean
       }));
       data.append('tourOptions', JSON.stringify(cleanedOptions));
 
@@ -833,6 +836,21 @@ function CreatePackageContent() {
                                     )}
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2">💡 Tip: Use emojis like 🚗 (car), 🗣️ (guide), 🚌 (bus), or any custom icon</p>
+                            </div>
+
+                            {/* Pickup Option Checkbox */}
+                            <div className="mb-4 flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-100">
+                                <input 
+                                    type="checkbox" 
+                                    id={`pickup-${idx}`}
+                                    checked={(option as any).isPickupIncluded || false} 
+                                    onChange={(e) => handleTourOptionChange(idx, 'isPickupIncluded', e.target.checked)}
+                                    className="w-5 h-5 text-green-600 rounded focus:ring-green-500"
+                                />
+                                <label htmlFor={`pickup-${idx}`} className="text-sm font-medium text-gray-700 cursor-pointer">
+                                    Enable "Pickup Included" Option (No Extra Charge)
+                                    <span className="block text-xs text-gray-500 font-normal mt-0.5">If checked, the "Pickup Included" feature will be active and users can enter their location.</span>
+                                </label>
                             </div>
 
                             {/* Extra Services */}
