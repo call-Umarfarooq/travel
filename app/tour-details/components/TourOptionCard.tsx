@@ -35,6 +35,7 @@ interface TourOptionCardProps {
     items?: number;
     timeSlot?: string; // New
     pickupLocation?: string;
+    transferType?: string; // New
     totalPrice: string;
   }) => void;
 }
@@ -203,7 +204,17 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
                     quantity: qty,
                     total: price * qty
                 };
-            }) 
+            }),
+        transferType: (() => {
+            const privateTransferIdx = extraServices.findIndex(s => s.name === 'Private Transfer');
+            if (privateTransferIdx !== -1 && (extrasQuantities[privateTransferIdx] || 0) > 0) {
+                return 'Private Transfer';
+            }
+            if (isPickupIncluded && pickupIncludedChecked) {
+                return 'Free Transfer';
+            }
+            return '-';
+        })()
       };
       if(onBookNow) onBookNow({...details, action: action} as any);
   };

@@ -63,7 +63,7 @@ const CategoriesSection: React.FC = () => {
         {/* Desktop View: Straight 4 Cards (Hidden on mobile) */}
         <div className="hidden md:grid md:grid-cols-4 gap-6 lg:gap-8">
           {categories.map((category, index) => (
-            <div
+            <Link href={category._id ? `/travel-with-us?category=${category._id}` : '/travel-with-us'}
               key={index}
               className="flex flex-col items-center"
             >
@@ -86,7 +86,7 @@ const CategoriesSection: React.FC = () => {
                   See More
                 </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 

@@ -57,6 +57,7 @@ const BookingSchema = new mongoose.Schema({
       enum: ['pending', 'paid', 'failed'],
       default: 'pending'
   },
+  transferType: { type: String }, // 'Free Transfer', 'Private Transfer', or '-'
   paymentIntentId: String,
   paymentMethod: {
       type: String,

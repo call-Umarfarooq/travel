@@ -120,6 +120,7 @@ export default function CityTourPage() {
       
       timeSlot: guestDetails.timeSlot,
       pickupLocation: guestDetails.pickupLocation,
+      transferType: guestDetails.transferType,
       extraServices: guestDetails.extraServices || [],
       
       totalPrice: Number(guestDetails.totalPrice)

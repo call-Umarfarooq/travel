@@ -47,6 +47,7 @@ interface BookingDetails {
     };
     paymentMethod: string; // 'stripe' | 'cash'
     status: string;
+    transferType?: string;
     [key: string]: any;
 }
 
@@ -97,14 +98,29 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.guestDetails.children}</td>
             </tr>` : ''}
             <tr>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Seating:</td>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.optionTitle || '-'}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Transfer Type:</td>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.transferType || '-'}</td>
+            </tr>
+            <tr>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Pickup:</td>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.contactInfo?.pickupLocation || 'Not specified'}</td>
             </tr>
+            ${(b.extraServices && b.extraServices.length > 0) ? `
+             <tr>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Extra Services:</td>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">
+                    ${b.extraServices.map((es: any) => `<div>${es.name} (x${es.quantity})</div>`).join('')}
+                </td>
+            </tr>` : ''}
             <tr>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Payment Method:</td>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${paymentMethod}</td>
             </tr>
-             <tr>
+            <tr>
                 <td style="padding: 10px 15px; font-weight: bold;">Order sum:</td>
                 <td style="padding: 10px 15px;">${b.pricing?.totalPrice || 0} ${currency}</td>
             </tr>

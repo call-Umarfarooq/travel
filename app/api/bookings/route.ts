@@ -65,6 +65,7 @@ export async function POST(request: Request) {
             countryCode: buyerInfo.countryCode,
             pickupLocation: item.pickupLocation || buyerInfo.pickupLocation,
         },
+        transferType: item.transferType || '-', // Save transfer type
         paymentStatus: pStatus,
         paymentIntentId: paymentIntentId,
         paymentMethod: paymentMethod, // Store method
