@@ -57,8 +57,7 @@ export default function CityTourPage() {
           adultPrice: 253.50,
           childPrice: 177.45,
           infantPrice: 0,
-          features: [], 
-          time: '14:45' 
+          features: []
         }
     ]
   };
@@ -108,7 +107,6 @@ export default function CityTourPage() {
       slug: slug || 'custom-package',
       image: activeData.image,
       optionTitle: option.title,
-      time: option.time,
       date: selectedDate || new Date(),
       pricingType: option.pricingType || 'person',
       
@@ -147,7 +145,7 @@ export default function CityTourPage() {
         { icon: 'guide', label: 'Tour Guide' },
       ],
       penalty: 'Less Than 1 Days Before Start Of The Experience: 100% Penalty',
-      time: '14:45',
+      timeSlots: [],
       pricePerPerson: activeData.price || 253.50,
       adultPrice: activeData.price || 253.50,
       childPrice: (activeData.price ? activeData.price * 0.7 : 177.45),
@@ -162,7 +160,7 @@ export default function CityTourPage() {
         { icon: 'guide', label: 'Best Tour Guide' },
       ],
       penalty: 'Less Than 2 Days Before Start Of The Experience: 50% Penalty',
-      time: '10:00',
+      timeSlots: [],
       pricePerPerson: (activeData.price ? activeData.price * 1.5 : 450.00),
       adultPrice: (activeData.price ? activeData.price * 1.5 : 450.00),
       childPrice: 350.00,
@@ -178,7 +176,7 @@ export default function CityTourPage() {
         { icon: 'guide', label: 'Private Guide' },
       ],
       penalty: 'Less Than 3 Days Before Start Of The Experience: 25% Penalty',
-      time: '09:00',
+      timeSlots: [],
       pricePerPerson: (activeData.price ? activeData.price * 2 : 600.00),
       adultPrice: (activeData.price ? activeData.price * 2 : 600.00),
       childPrice: 450.00,

@@ -8,7 +8,6 @@ interface TourOptionCardProps {
   description?: string;
   features: { icon: string; label: string }[];
   penalty: string;
-  time: string;
   timeSlots?: string[];
   tourDurationType?: 'hours' | 'days'; // New
   isPickupIncluded?: boolean; // New
@@ -46,8 +45,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
   description,
   features,
   penalty,
-  time,
-  timeSlots = [], // New
+  timeSlots = [],
   tourDurationType = 'hours', // New prop with default
   pricingType = 'person',
   adultPrice,
@@ -187,7 +185,7 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
         guests: pricingType === 'group' ? guests : 0,
         items: pricingType === 'group' ? items : 0,
         // For 'days', we might fallback to generic time or just empty/null effectively
-        timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : time,
+        timeSlot: (tourDurationType === 'hours' && timeSlots.length > 0) ? selectedTimeSlot! : undefined,
         pickupLocation: (
             (extraServices.findIndex(s => s.name === 'Private Transfer') !== -1 && (extrasQuantities[extraServices.findIndex(s => s.name === 'Private Transfer')] || 0) > 0) ||
             (isPickupIncluded && pickupIncludedChecked)
@@ -293,41 +291,35 @@ const TourOptionCard: React.FC<TourOptionCardProps> = ({
             )}
 
              {/* Conditional Time Slot Render */}
-             {/* Only show time slots if duration type is 'hours' */}
-             {tourDurationType === 'hours' && (
+             {/* Only show time slots section if timeSlots has items */}
+             {tourDurationType === 'hours' && timeSlots && timeSlots.length > 0 && (
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
                       <svg className="w-5 h-5 text-[#F85E46]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      <span className="text-base md:text-[20px] text-[#000000]">
-                        {timeSlots && timeSlots.length > 0 ? ':' : ': ' + time}
-                      </span>
+                      <span className="text-base md:text-[20px] text-[#000000]">:</span>
                   </div>
                   
                   {/* Time Slots Grid */}
-                  {timeSlots && timeSlots.length > 0 && (
-                    <>
-                      <p className="text-sm md:text-[16px] text-[#F85E46] font-medium mb-3">
-                        Please select a time frame to continue
-                      </p>
-                      <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
-                        {timeSlots.map((slot, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setSelectedTimeSlot(slot)}
-                            className={`px-4 py-2 rounded-lg text-sm md:text-[18px] font-medium transition-colors border
-                              ${selectedTimeSlot === slot 
-                                ? 'bg-[#F85E46] text-white border-[#F85E46]' 
-                                : 'bg-[#E8E8E8] text-[#000000] border-transparent hover:bg-gray-300'
-                              }`}
-                          >
-                            {slot}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                  <p className="text-sm md:text-[16px] text-[#F85E46] font-medium mb-3">
+                    Please select a time frame to continue
+                  </p>
+                  <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
+                    {timeSlots.map((slot, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedTimeSlot(slot)}
+                        className={`px-4 py-2 rounded-lg text-sm md:text-[18px] font-medium transition-colors border
+                          ${selectedTimeSlot === slot 
+                            ? 'bg-[#F85E46] text-white border-[#F85E46]' 
+                            : 'bg-[#E8E8E8] text-[#000000] border-transparent hover:bg-gray-300'
+                          }`}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
                 </div>
              )}
 

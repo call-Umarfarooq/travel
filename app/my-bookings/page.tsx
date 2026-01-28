@@ -100,6 +100,12 @@ export default function MyBookingsPage() {
                         <span className="block text-gray-400 text-xs mb-1">Date</span>
                         {new Date(booking.date).toLocaleDateString()}
                     </div>
+                    {booking.time && (
+                      <div>
+                          <span className="block text-gray-400 text-xs mb-1">Time</span>
+                          {booking.time}
+                      </div>
+                    )}
                     <div>
                         <span className="block text-gray-400 text-xs mb-1">Guests</span>
                         {booking.guestDetails?.totalGuests || 0} People

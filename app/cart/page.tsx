@@ -242,9 +242,11 @@ export default function CartPage() {
                                         <div className="flex items-center gap-1">
                                            <span>📅</span> {new Date(item.date).toLocaleDateString()}
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                           <span>⏰</span> {item.timeSlot || item.time}
-                                        </div>
+                                        {item.timeSlot && (
+                                          <div className="flex items-center gap-1">
+                                             <span>⏰</span> {item.timeSlot}
+                                          </div>
+                                        )}
                                         <div className="flex items-center gap-1">
                                            <span>👥</span> 
                                            {item.pricingType === 'group' 

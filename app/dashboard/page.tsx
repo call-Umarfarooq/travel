@@ -228,8 +228,13 @@ export default function Dashboard() {
                                         {booking._id.substring(booking._id.length - 6).toUpperCase()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {new Date(booking.date).toLocaleDateString()} <br/>
-                                        <span className="text-xs text-gray-500">{booking.time}</span>
+                                        {new Date(booking.date).toLocaleDateString()}
+                                        {booking.time && (
+                                            <>
+                                                <br/>
+                                                <span className="text-xs text-gray-500">{booking.time}</span>
+                                            </>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <div className="font-medium">{booking.contactInfo?.firstName} {booking.contactInfo?.lastName}</div>

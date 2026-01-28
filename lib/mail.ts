@@ -87,6 +87,10 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Tour date:</td>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${new Date(b.date).toLocaleDateString()}</td>
             </tr>
+            ${b.time ? `<tr>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Time:</td>
+                <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0;">${b.time}</td>
+            </tr>` : ''}
             ${(b.guestDetails?.adults && b.guestDetails.adults > 0) ? `
              <tr>
                 <td style="padding: 10px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold;">Adult:</td>

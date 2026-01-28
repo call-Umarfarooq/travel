@@ -24,7 +24,6 @@ export interface IPackage extends Document {
   tourOptions: {
     title: string;
     duration: string;
-    time: string;
     description?: string;
     tourDurationType?: 'hours' | 'days'; // New field
     timeSlots?: string[]; 
@@ -66,8 +65,7 @@ const TourOptionSchema = new mongoose.Schema({
   duration: String,
   tourDurationType: { type: String, enum: ['hours', 'days'], default: 'hours' }, // New
   isPickupIncluded: { type: Boolean, default: false }, // New
-  time: String,
-  timeSlots: [String], // New
+  timeSlots: [String], // User selects from available time slots
   description: String,
   
   // Pricing

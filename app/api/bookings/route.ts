@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         package: item.packageId, // Corrected to use packageId
         title: item.title, // Added missing title
         date: new Date(item.date),
-        time: item.time,
+        time: item.timeSlot || undefined,
         optionTitle: item.optionTitle,
         guestDetails: {
             adults: item.adults || 0,
