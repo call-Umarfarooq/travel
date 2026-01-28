@@ -69,7 +69,7 @@ export const sendBookingConfirmation = async (bookings: BookingDetails[]) => {
     const buyer = bookings[0].contactInfo;
     const totalAmount = bookings.reduce((sum, b) => sum + (b.pricing?.totalPrice || 0), 0);
     const currency = bookings[0].pricing?.currency || 'AED';
-    const paymentMethod = bookings[0].paymentMethod === 'cash' ? 'Pay Later (Cash)' : 'Paid Online (Stripe)';
+    const paymentMethod = (bookings[0].paymentMethod === 'cash' || bookings[0].paymentMethod === 'pay_later') ? 'Book Now, Pay Later(Cash)' : 'Paid Online (Stripe)';
 
     // Build Items List HTML
     const itemsHtml = bookings.map(b => `
